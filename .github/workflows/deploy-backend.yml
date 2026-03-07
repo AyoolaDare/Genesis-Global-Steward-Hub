@@ -15,6 +15,20 @@ jobs:
     # CI workflow must pass first (enforced by branch protection rules)
 
     steps:
+      - name: Validate Render secrets
+        shell: bash
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+          RENDER_BACKEND_URL: ${{ secrets.RENDER_BACKEND_URL }}
+        run: |
+          missing=0
+          [ -z "$RENDER_DEPLOY_HOOK_URL" ] && echo "Missing secret: RENDER_DEPLOY_HOOK_URL" && missing=1
+          [ -z "$RENDER_BACKEND_URL" ] && echo "Missing secret: RENDER_BACKEND_URL" && missing=1
+          if [ "$missing" -eq 1 ]; then
+            echo "Add missing secrets in GitHub: Settings > Secrets and variables > Actions"
+            exit 1
+          fi
+
       - name: Trigger Render Deploy Hook
         run: |
           curl -fsSL -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
