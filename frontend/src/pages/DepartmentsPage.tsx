@@ -205,10 +205,7 @@ function DeptDetail({ deptId }: { deptId: string }) {
     onError: () => toast.error('Failed to remove'),
   })
 
-  if (isLoading) return <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>{Array.from({ length: 6 }).map((_, i) => <div key={i} className="skeleton" style={{ height: 20 }} />)}</div>
-  if (!dept) return null
-
-  const members: DepartmentMember[] = (dept as any).members ?? []
+  const members: DepartmentMember[] = (dept as any)?.members ?? []
   const activeMembers = members.filter((m) => m.is_active)
   const activeMemberIds = new Set(activeMembers.map((m) => m.person))
 
@@ -218,6 +215,9 @@ function DeptDetail({ deptId }: { deptId: string }) {
     select: (res) => res.data.results,
     enabled: tab === 'members' && debouncedAddQuery.trim().length >= 2,
   })
+
+  if (isLoading) return <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>{Array.from({ length: 6 }).map((_, i) => <div key={i} className="skeleton" style={{ height: 20 }} />)}</div>
+  if (!dept) return null
 
   return (
     <>
