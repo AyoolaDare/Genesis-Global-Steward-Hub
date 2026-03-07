@@ -65,7 +65,16 @@ jobs:
 
       - name: Run tests with pytest
         working-directory: backend
-        run: pytest -v --tb=short; CODE=$?; [ $CODE -eq 5 ] && exit 0 || exit $CODE
+        run: |
+          set +e
+          pytest -v --tb=short
+          CODE=$?
+          set -e
+          if [ "$CODE" -eq 5 ]; then
+            echo "No tests collected; treating as success."
+            exit 0
+          fi
+          exit "$CODE"
         env:
           DJANGO_SETTINGS_MODULE: cms.settings.development
           SECRET_KEY:   ci-test-secret-key-not-for-production

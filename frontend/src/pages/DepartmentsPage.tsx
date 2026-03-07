@@ -8,7 +8,7 @@ import Modal from '@/components/ui/Modal'
 import { format } from 'date-fns'
 import { useAuthStore } from '@/store/authStore'
 import { personsApi } from '@/api/persons'
-import useDebounce from '@/hooks/useDebounce'
+import { useDebounce } from '@/hooks/useDebounce'
 
 function CreateDepartmentModal({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient()
