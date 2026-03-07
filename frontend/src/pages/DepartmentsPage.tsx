@@ -1,42 +1,38 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Building2, Users, Plus, CheckSquare, UserPlus, Trash2, Search } from 'lucide-react'
+import { Building2, Users, Plus, CheckSquare, UserPlus, Trash2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { departmentsApi, type DepartmentMember, type AttendanceSession, type MarkAttendancePayload } from '@/api/departments'
 import Drawer from '@/components/ui/Drawer'
 import Modal from '@/components/ui/Modal'
 import { format } from 'date-fns'
 import { useAuthStore } from '@/store/authStore'
-import { personsApi } from '@/api/persons'
+import { personsApi, type PersonListItem } from '@/api/persons'
 import { useDebounce } from '@/hooks/useDebounce'
 
 function CreateDepartmentModal({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient()
   const [name, setName] = useState('')
 
-  const [hodPhone, setHodPhone] = useState('')
-  const [hod, setHod] = useState<any>(null)
-  const [assistantPhone, setAssistantPhone] = useState('')
-  const [assistant, setAssistant] = useState<any>(null)
+  const [hodQuery, setHodQuery] = useState('')
+  const [hod, setHod] = useState<PersonListItem | null>(null)
+  const [assistantQuery, setAssistantQuery] = useState('')
+  const [assistant, setAssistant] = useState<PersonListItem | null>(null)
+  const debouncedHodQuery = useDebounce(hodQuery, 300)
+  const debouncedAssistantQuery = useDebounce(assistantQuery, 300)
 
-  const lookupHod = useMutation({
-    mutationFn: () => personsApi.phoneLookup([hodPhone]),
-    onSuccess: (res) => {
-      const p = res.data.results[0]?.person
-      if (!p) return toast.error('HOD not found')
-      setHod(p)
-      toast.success('HOD selected')
-    },
+  const { data: hodResults, isFetching: hodSearching } = useQuery({
+    queryKey: ['dept-create-hod-search', debouncedHodQuery],
+    queryFn: () => personsApi.list({ search: debouncedHodQuery }),
+    select: (res) => res.data.results,
+    enabled: debouncedHodQuery.trim().length >= 2,
   })
 
-  const lookupAssistant = useMutation({
-    mutationFn: () => personsApi.phoneLookup([assistantPhone]),
-    onSuccess: (res) => {
-      const p = res.data.results[0]?.person
-      if (!p) return toast.error('Assistant HOD not found')
-      setAssistant(p)
-      toast.success('Assistant HOD selected')
-    },
+  const { data: assistantResults, isFetching: assistantSearching } = useQuery({
+    queryKey: ['dept-create-assistant-search', debouncedAssistantQuery],
+    queryFn: () => personsApi.list({ search: debouncedAssistantQuery }),
+    select: (res) => res.data.results,
+    enabled: debouncedAssistantQuery.trim().length >= 2,
   })
 
   const createMutation = useMutation({
@@ -61,15 +57,63 @@ function CreateDepartmentModal({ onClose }: { onClose: () => void }) {
           <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Choir" />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 8 }}>
-          <input className="input" value={hodPhone} onChange={(e) => setHodPhone(e.target.value)} placeholder="HOD phone number" />
-          <button onClick={() => lookupHod.mutate()} style={btnAccent}><Search size={14} /></button>
+        <div>
+          <input className="input" value={hodQuery} onChange={(e) => setHodQuery(e.target.value)} placeholder="Search HOD by name or phone..." />
+          <div style={{ marginTop: 8, border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+            {hodQuery.trim().length < 2 ? (
+              <div style={{ padding: '10px 12px', fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>Type at least 2 characters.</div>
+            ) : hodSearching ? (
+              <div style={{ padding: '10px 12px', fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>Searching...</div>
+            ) : !hodResults || hodResults.length === 0 ? (
+              <div style={{ padding: '10px 12px', fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>No matching member found.</div>
+            ) : (
+              hodResults.slice(0, 6).map((person) => (
+                <div key={person.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, padding: '10px 12px', borderTop: '1px solid var(--color-border)' }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 'var(--text-sm)', fontWeight: 500 }}>{person.first_name} {person.last_name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>{person.phone}</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setHod(person); setHodQuery(`${person.first_name} ${person.last_name}`) }}
+                    style={btnSmall}
+                  >
+                    Select
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
         </div>
         {hod && <div style={picked}>HOD: {hod.first_name} {hod.last_name} ({hod.phone})</div>}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 8 }}>
-          <input className="input" value={assistantPhone} onChange={(e) => setAssistantPhone(e.target.value)} placeholder="Assistant HOD phone number" />
-          <button onClick={() => lookupAssistant.mutate()} style={btnAccent}><Search size={14} /></button>
+        <div>
+          <input className="input" value={assistantQuery} onChange={(e) => setAssistantQuery(e.target.value)} placeholder="Search Assistant HOD by name or phone..." />
+          <div style={{ marginTop: 8, border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+            {assistantQuery.trim().length < 2 ? (
+              <div style={{ padding: '10px 12px', fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>Type at least 2 characters.</div>
+            ) : assistantSearching ? (
+              <div style={{ padding: '10px 12px', fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>Searching...</div>
+            ) : !assistantResults || assistantResults.length === 0 ? (
+              <div style={{ padding: '10px 12px', fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>No matching member found.</div>
+            ) : (
+              assistantResults.slice(0, 6).map((person) => (
+                <div key={person.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, padding: '10px 12px', borderTop: '1px solid var(--color-border)' }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 'var(--text-sm)', fontWeight: 500 }}>{person.first_name} {person.last_name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>{person.phone}</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setAssistant(person); setAssistantQuery(`${person.first_name} ${person.last_name}`) }}
+                    style={btnSmall}
+                  >
+                    Select
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
         </div>
         {assistant && <div style={picked}>Assistant HOD: {assistant.first_name} {assistant.last_name} ({assistant.phone})</div>}
       </div>
@@ -394,3 +438,4 @@ const picked: React.CSSProperties = { fontSize: 'var(--text-xs)', color: 'var(--
 const btnGhost: React.CSSProperties = { height: 40, padding: '0 14px', border: '1.5px solid var(--color-border)', borderRadius: 'var(--radius-md)', background: 'none', cursor: 'pointer' }
 const btnAccent: React.CSSProperties = { height: 40, padding: '0 14px', background: 'var(--accent-department)', color: '#fff', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 600 }
 const btnMuted: React.CSSProperties = { height: 32, padding: '0 10px', background: 'var(--color-surface-alt)', color: 'var(--color-text-muted)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', cursor: 'not-allowed', display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 600, fontSize: 'var(--text-xs)' }
+const btnSmall: React.CSSProperties = { height: 30, padding: '0 10px', background: 'var(--accent-department)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontSize: 'var(--text-xs)', fontWeight: 600 }
