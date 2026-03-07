@@ -22,6 +22,7 @@ services:
       python manage.py collectstatic --noinput --settings=cms.settings.production
     startCommand: >
       python manage.py migrate --settings=cms.settings.production &&
+      python manage.py ensure_superuser --settings=cms.settings.production &&
       gunicorn cms.wsgi:application
       --bind 0.0.0.0:$PORT
       --workers 2
@@ -94,6 +95,16 @@ services:
 
       - key: EMAIL_FROM
         value: noreply@yourchurch.org
+
+      # Optional one-time bootstrap admin (set in dashboard; do not commit real values)
+      - key: SUPERUSER_EMAIL
+        sync: false
+
+      - key: SUPERUSER_USERNAME
+        sync: false
+
+      - key: SUPERUSER_PASSWORD
+        sync: false
 
 databases:
   - name: cms-db
