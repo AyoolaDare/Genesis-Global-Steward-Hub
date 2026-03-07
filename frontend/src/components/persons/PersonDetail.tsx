@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { CheckCircle, Edit2, Trash2, GitMerge } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { personsApi, type Person } from '@/api/persons'
+import { personsApi } from '@/api/persons'
 import StatusBadge from '@/components/ui/StatusBadge'
 import PersonForm from './PersonForm'
 import MergeDialog from './MergeDialog'
@@ -51,7 +51,7 @@ export default function PersonDetail({ personId, onClose }: Props) {
       queryClient.invalidateQueries({ queryKey: ['persons'] })
       toast.success('Profile approved')
     },
-    onError: (err: any) => toast.error(err.response?.data?.error?.message ?? 'Failed to approve'),
+    onError: (err: unknown) => toast.error((err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message ?? 'Failed to approve'),
   })
 
   const deleteMutation = useMutation({

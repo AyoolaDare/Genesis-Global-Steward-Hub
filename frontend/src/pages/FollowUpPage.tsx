@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, CheckCircle, User, Calendar, AlertTriangle } from 'lucide-react'
+import { CheckCircle, User, Calendar, AlertTriangle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { followupApi, type FollowUpTask, type TaskStatus, type TaskPriority } from '@/api/followup'
 import Modal from '@/components/ui/Modal'
@@ -150,7 +150,7 @@ function CompleteDialog({ task, onClose }: { task: FollowUpTask; onClose: () => 
 function AssignDialog({ task, onClose }: { task: FollowUpTask; onClose: () => void }) {
   const queryClient = useQueryClient()
   const user = useAuthStore((s) => s.user)
-  const [userId, setUserId] = useState(user?.id ?? '')
+  const userId = user?.id ?? ''
 
   const mutation = useMutation({
     mutationFn: () => followupApi.assign(task.id, { assigned_to: userId }),

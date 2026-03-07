@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Search, Plus, ClipboardList } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -9,7 +9,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { format } from 'date-fns'
-import { useDebounce } from '@/hooks/useDebounce'
 
 /* ─── Visit Form ─────────────────────────────────────── */
 const visitSchema = z.object({
@@ -228,7 +227,6 @@ export default function MedicalPage() {
   const [foundPerson, setFoundPerson] = useState<any>(null)
   const [record, setRecord]         = useState<MedicalRecord | null>(null)
   const [notFound, setNotFound]     = useState(false)
-  const queryClient = useQueryClient()
 
   const lookupMutation = useMutation({
     mutationFn: () => personsApi.phoneLookup([phone]),

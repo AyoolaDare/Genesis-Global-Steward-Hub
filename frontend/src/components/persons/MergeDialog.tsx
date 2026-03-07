@@ -41,7 +41,7 @@ export default function MergeDialog({ primaryId, primaryName, onClose }: Props) 
       toast.success('Profiles merged successfully')
       onClose()
     },
-    onError: (err: any) => toast.error(err.response?.data?.error?.message ?? 'Merge failed'),
+    onError: (err: unknown) => toast.error((err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message ?? 'Merge failed'),
   })
 
   return (

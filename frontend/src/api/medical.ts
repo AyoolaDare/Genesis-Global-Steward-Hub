@@ -69,5 +69,5 @@ export const medicalApi = {
     api.get<{ results: MedicalVisit[] }>(`/medical/visits/?medical_record=${recordId}`),
   createVisit: (data: CreateVisitPayload)  => api.post<MedicalVisit>('/medical/visits/', data),
   phoneLookup: (phones: string[]) =>
-    api.post<{ results: { phone: string; person: any }[] }>('/persons/phone_lookup/', { phones }),
+    api.post<{ results: { phone: string; person: { id: string; first_name: string; last_name: string; phone: string } | null }[] }>('/persons/phone_lookup/', { phones }),
 }

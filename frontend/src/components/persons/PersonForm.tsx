@@ -57,7 +57,7 @@ export default function PersonForm({ person, onClose }: Props) {
           source:             person.source,
           address:            person.address,
           occupation:         person.occupation,
-          marital_status:     (person.marital_status as any) ?? '',
+          marital_status:     (person.marital_status as 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED' | '') ?? '',
           water_baptism:      person.water_baptism,
           holy_ghost_baptism: person.holy_ghost_baptism,
         }
@@ -72,8 +72,8 @@ export default function PersonForm({ person, onClose }: Props) {
       toast.success(isEdit ? 'Person updated' : 'Person added')
       onClose()
     },
-    onError: (err: any) => {
-      toast.error(err.response?.data?.error?.message ?? 'An error occurred')
+    onError: (err: unknown) => {
+      toast.error((err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message ?? 'An error occurred')
     },
   })
 

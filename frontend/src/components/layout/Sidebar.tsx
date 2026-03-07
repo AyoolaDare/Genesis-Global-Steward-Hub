@@ -42,7 +42,7 @@ export default function Sidebar({ unreadCount, isMobile = false, open = false, o
   const navigate = useNavigate()
 
   const handleLogout = async () => {
-    try { await authApi.logout(refreshToken) } catch {}
+    try { await authApi.logout(refreshToken) } catch { /* ignore logout errors */ }
     clearAuth()
     navigate('/login', { replace: true })
     toast.success('Logged out')

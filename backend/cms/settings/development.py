@@ -24,6 +24,9 @@ MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
 INTERNAL_IPS = ['127.0.0.1']
 
 # Use local file storage in development
-DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+}
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

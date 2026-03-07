@@ -28,7 +28,7 @@ function CreateGroupModal({ onClose }: { onClose: () => void }) {
   const mutation = useMutation({
     mutationFn: (data: CreateForm) => cellGroupsApi.create(data),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['cells'] }); toast.success('Cell group created'); onClose() },
-    onError: (err: any) => toast.error(err.response?.data?.error?.message ?? 'Failed to create'),
+    onError: (err: unknown) => toast.error((err as { response?: { data?: { error?: { message?: string } } } })?.response?.data?.error?.message ?? 'Failed to create'),
   })
 
   const inputStyle = { height: 40, padding: '0 12px', border: '1.5px solid var(--color-border)', borderRadius: 'var(--radius-md)', font: `400 var(--text-base) var(--font-body)`, color: 'var(--color-text-body)', background: 'var(--color-surface)', width: '100%', boxSizing: 'border-box' as const }
@@ -77,7 +77,7 @@ function AddMembersDialog({ groupId, onClose }: { groupId: string; onClose: () =
   const queryClient = useQueryClient()
   const [rawPhones, setRawPhones] = useState('')
   const [step, setStep] = useState<'input' | 'preview'>('input')
-  const [results, setResults] = useState<{ phone: string; person: any }[]>([])
+  const [results, setResults] = useState<{ phone: string; person: { id: string; first_name: string; last_name: string } | null }[]>([])
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
   const lookupMutation = useMutation({
@@ -96,7 +96,7 @@ function AddMembersDialog({ groupId, onClose }: { groupId: string; onClose: () =
 
   const addMutation = useMutation({
     mutationFn: () => cellGroupsApi.addMembers(groupId, Array.from(selected)),
-    onSuccess: (res: any) => {
+    onSuccess: (res: { data: { count: number } }) => {
       queryClient.invalidateQueries({ queryKey: ['cells', groupId] })
       toast.success(`${res.data.count} member(s) added`)
       onClose()
