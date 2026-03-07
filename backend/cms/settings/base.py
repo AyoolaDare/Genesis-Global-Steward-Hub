@@ -165,8 +165,8 @@ CORS_ALLOWED_ORIGINS = config(
 # CSRF
 CSRF_COOKIE_HTTPONLY = True
 
-# Email — console backend by default; production.py overrides with SMTP
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Email paused globally for now (no outbound delivery)
+EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 DEFAULT_FROM_EMAIL = config('EMAIL_FROM', default='noreply@yourchurch.org')
 
 # Logging — captures security and request warnings in all environments

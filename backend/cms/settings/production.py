@@ -46,14 +46,8 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': config('CLOUDINARY_API_SECRET'),
 }
 
-# Email via SendGrid SMTP
-EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST          = 'smtp.sendgrid.net'
-EMAIL_PORT          = 587
-EMAIL_USE_TLS       = True
-EMAIL_HOST_USER     = 'apikey'
-EMAIL_HOST_PASSWORD = config('SENDGRID_API_KEY')
-DEFAULT_FROM_EMAIL  = config('EMAIL_FROM')
+# Email paused globally for now (no outbound delivery)
+EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 
 # HTTPS / Security headers
 SECURE_PROXY_SSL_HEADER        = ('HTTP_X_FORWARDED_PROTO', 'https')

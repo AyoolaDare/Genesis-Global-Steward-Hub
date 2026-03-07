@@ -1,6 +1,4 @@
 from django.contrib.auth import authenticate
-from django.core.mail import send_mail
-from django.conf import settings
 from rest_framework import status
 from rest_framework import mixins, viewsets
 from rest_framework.filters import SearchFilter
@@ -128,21 +126,4 @@ class SystemUserViewSet(
         return SystemUserSerializer
 
     def perform_create(self, serializer):
-        user = serializer.save()
-        dept = user.department.name if user.department else 'No department assigned'
-        try:
-            send_mail(
-                subject='Welcome to Genesis Global Steward Hub',
-                message=(
-                    f"Hello {user.username},\n\n"
-                    "You have been added to the Genesis Global Steward Hub.\n"
-                    f"Role: {user.role}\n"
-                    f"Department: {dept}\n\n"
-                    "Use the temporary password assigned by the administrator and reset your password immediately after login.\n"
-                ),
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                fail_silently=True,
-            )
-        except Exception:
-            pass
+        serializer.save()
