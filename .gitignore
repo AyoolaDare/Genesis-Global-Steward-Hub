@@ -1,0 +1,59 @@
+# ═══════════════════════════════════════════════════
+# Python / Django
+# ═══════════════════════════════════════════════════
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+backend/staticfiles/
+backend/media/
+backend/*.egg-info/
+backend/dist/
+backend/.pytest_cache/
+backend/coverage.xml
+backend/.coverage
+backend/htmlcov/
+
+# ═══════════════════════════════════════════════════
+# Node / Frontend
+# ═══════════════════════════════════════════════════
+node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+
+# ═══════════════════════════════════════════════════
+# Environment / Secrets — NEVER commit these
+# ═══════════════════════════════════════════════════
+.env
+backend/.env
+# Allow .env.example templates to be committed
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+
+# ═══════════════════════════════════════════════════
+# IDE / OS
+# ═══════════════════════════════════════════════════
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ═══════════════════════════════════════════════════
+# Logs
+# ═══════════════════════════════════════════════════
+*.log
+logs/
+
+# ═══════════════════════════════════════════════════
+# Claude Code internal — not needed in remote repo
+# ═══════════════════════════════════════════════════
+.claude/

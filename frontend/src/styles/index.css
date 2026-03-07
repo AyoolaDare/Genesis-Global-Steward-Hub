@@ -1,0 +1,195 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Typography Variables ─────────────────────────────── */
+:root {
+  --font-display: 'Sora', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+
+/* ─── Font Size Scale ───────────────────────────────────── */
+:root {
+  --text-xs:   11px;
+  --text-sm:   13px;
+  --text-base: 15px;
+  --text-md:   17px;
+  --text-lg:   20px;
+  --text-xl:   24px;
+  --text-2xl:  32px;
+  --text-3xl:  42px;
+}
+
+/* ─── Color System ──────────────────────────────────────── */
+:root {
+  /* Brand */
+  --color-primary:        #1B4FDB;
+  --color-primary-light:  #3B6FF5;
+  --color-primary-dark:   #1239A8;
+  --color-primary-subtle: #EEF2FF;
+
+  /* Neutrals */
+  --color-bg:             #F4F6FB;
+  --color-surface:        #FFFFFF;
+  --color-surface-alt:    #F0F2F8;
+  --color-border:         #DDE1EE;
+  --color-border-strong:  #B8BEDC;
+
+  /* Text */
+  --color-text-primary:   #0F1733;
+  --color-text-body:      #2E3555;
+  --color-text-muted:     #7880A0;
+  --color-text-inverse:   #FFFFFF;
+
+  /* Semantic */
+  --color-success:        #12A15A;
+  --color-success-bg:     #EDFAF3;
+  --color-warning:        #D97706;
+  --color-warning-bg:     #FFFBEB;
+  --color-danger:         #DC2626;
+  --color-danger-bg:      #FEF2F2;
+  --color-info:           #0891B2;
+  --color-info-bg:        #ECFEFF;
+
+  /* Module Accent Colors */
+  --accent-admin:         #1B4FDB;
+  --accent-medical:       #059669;
+  --accent-followup:      #7C3AED;
+  --accent-cell:          #EA580C;
+  --accent-department:    #0891B2;
+  --accent-hr:            #DB2777;
+}
+
+/* ─── Dark Mode ─────────────────────────────────────────── */
+[data-theme="dark"] {
+  --color-bg:           #0C0F1E;
+  --color-surface:      #141829;
+  --color-surface-alt:  #1C2038;
+  --color-border:       #252C4A;
+  --color-text-primary: #EDF0FF;
+  --color-text-body:    #B8BEDC;
+  --color-text-muted:   #5B628A;
+}
+
+/* ─── Spacing Scale ─────────────────────────────────────── */
+:root {
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+}
+
+/* ─── Border Radius ─────────────────────────────────────── */
+:root {
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-full: 9999px;
+}
+
+/* ─── Responsive Breakpoints ────────────────────────────── */
+:root {
+  --bp-sm:  480px;
+  --bp-md:  768px;
+  --bp-lg:  1024px;
+  --bp-xl:  1280px;
+  --bp-2xl: 1536px;
+}
+
+/* ─── Base Reset & Globals ──────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--color-text-body);
+  background: var(--color-bg);
+  line-height: 1.6;
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+/* ─── Form Inputs ───────────────────────────────────────── */
+.input {
+  height: 40px;
+  padding: 0 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font: 400 var(--text-base) var(--font-body);
+  color: var(--color-text-body);
+  background: var(--color-surface);
+  transition: border-color 150ms;
+  width: 100%;
+}
+.input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(27, 79, 219, 0.12);
+  outline: none;
+}
+.input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* ─── Status Badges ─────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  font: 500 var(--text-xs) var(--font-body);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.badge-new      { background: var(--color-warning-bg);    color: var(--color-warning); }
+.badge-member   { background: var(--color-success-bg);    color: var(--color-success); }
+.badge-worker   { background: var(--color-primary-subtle); color: var(--color-primary); }
+.badge-pending  { background: var(--color-warning-bg);    color: var(--color-warning); }
+.badge-inactive { background: var(--color-surface-alt);   color: var(--color-text-muted); }
+
+/* ─── Skeleton Loader ───────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Focus Visible (Accessibility) ────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────── */
+::-webkit-scrollbar        { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: var(--color-border); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-border-strong); }

@@ -1,0 +1,38 @@
+name: Deploy Backend → Render
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'render.yaml'
+      - '.github/workflows/deploy-backend.yml'
+
+jobs:
+  deploy:
+    name: Deploy to Render
+    runs-on: ubuntu-latest
+    # CI workflow must pass first (enforced by branch protection rules)
+
+    steps:
+      - name: Trigger Render Deploy Hook
+        run: |
+          curl -fsSL -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+
+      - name: Wait for deployment to start
+        run: sleep 30
+
+      - name: Poll health check until healthy (max 5 min)
+        run: |
+          BACKEND_URL="${{ secrets.RENDER_BACKEND_URL }}"
+          for i in $(seq 1 20); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${BACKEND_URL}/api/v1/health/" || echo "000")
+            echo "Attempt $i: HTTP $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "Deployment healthy ✅"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "Health check timed out ❌"
+          exit 1
