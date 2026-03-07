@@ -1,8 +1,27 @@
 from pathlib import Path
 from datetime import timedelta
+from urllib.parse import urlsplit
 from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+
+def normalize_origin_list(value: str):
+    origins = []
+    for raw in value.split(','):
+        origin = raw.strip()
+        if not origin:
+            continue
+
+        parsed = urlsplit(origin)
+        if parsed.scheme and parsed.netloc:
+            normalized = f'{parsed.scheme}://{parsed.netloc}'
+        else:
+            normalized = origin.rstrip('/')
+
+        if normalized not in origins:
+            origins.append(normalized)
+    return origins
 
 # In development a fallback is allowed; production.py overrides with no default (hard failure).
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-REPLACE-IN-PRODUCTION')
@@ -159,7 +178,7 @@ CORS_ALLOW_CREDENTIALS = False
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
     default='http://localhost:5173,http://localhost:3000',
-    cast=lambda v: [s.strip() for s in v.split(',')]
+    cast=normalize_origin_list
 )
 
 # CSRF

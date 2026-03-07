@@ -25,13 +25,13 @@ DATABASES = {
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
-    cast=lambda v: [s.strip() for s in v.split(',')]
+    cast=normalize_origin_list
 )
 
 # CSRF trusted origins (required in Django 4+ for non-localhost HTTPS)
 CSRF_TRUSTED_ORIGINS = config(
     'CSRF_TRUSTED_ORIGINS',
-    cast=lambda v: [s.strip() for s in v.split(',')]
+    cast=normalize_origin_list
 )
 
 # WhiteNoise for static files on Render
