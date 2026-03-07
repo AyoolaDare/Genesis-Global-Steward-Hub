@@ -12,10 +12,13 @@ class Command(BaseCommand):
         username = config('SUPERUSER_USERNAME', default='').strip()
         password = config('SUPERUSER_PASSWORD', default='')
 
-        if not email or not username or not password:
+        if email and not username:
+            username = email.split('@')[0]
+
+        if not email or not password:
             self.stdout.write(
                 self.style.WARNING(
-                    'Skipping superuser bootstrap: set SUPERUSER_EMAIL, SUPERUSER_USERNAME, SUPERUSER_PASSWORD.'
+                    'Skipping superuser bootstrap: set SUPERUSER_EMAIL and SUPERUSER_PASSWORD.'
                 )
             )
             return
