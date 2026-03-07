@@ -14,8 +14,6 @@ export interface Department {
 
 export interface CreateDepartmentPayload {
   name: string
-  description?: string
-  category?: string
   hod?: string
   assistant_hod?: string
 }

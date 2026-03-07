@@ -8,12 +8,11 @@ import Modal from '@/components/ui/Modal'
 import { format } from 'date-fns'
 import { useAuthStore } from '@/store/authStore'
 import { personsApi } from '@/api/persons'
+import useDebounce from '@/hooks/useDebounce'
 
 function CreateDepartmentModal({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient()
   const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [category, setCategory] = useState('')
 
   const [hodPhone, setHodPhone] = useState('')
   const [hod, setHod] = useState<any>(null)
@@ -43,8 +42,6 @@ function CreateDepartmentModal({ onClose }: { onClose: () => void }) {
   const createMutation = useMutation({
     mutationFn: () => departmentsApi.create({
       name,
-      description,
-      category,
       hod: hod?.id,
       assistant_hod: assistant?.id,
     }),
@@ -62,14 +59,6 @@ function CreateDepartmentModal({ onClose }: { onClose: () => void }) {
         <div>
           <label style={lbl}>Department Name *</label>
           <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Choir" />
-        </div>
-        <div>
-          <label style={lbl}>Category</label>
-          <input className="input" value={category} onChange={(e) => setCategory(e.target.value)} placeholder="e.g. Ministry" />
-        </div>
-        <div>
-          <label style={lbl}>Description</label>
-          <textarea className="input" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} style={{ height: 'auto', padding: '8px 12px' }} />
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 8 }}>
@@ -187,8 +176,9 @@ function MarkAttendanceModal({ deptId, members, onClose }: { deptId: string; mem
 function DeptDetail({ deptId }: { deptId: string }) {
   const queryClient = useQueryClient()
   const [tab, setTab] = useState<'members' | 'attendance'>('members')
-  const [addPhone, setAddPhone] = useState('')
+  const [addQuery, setAddQuery] = useState('')
   const [markOpen, setMarkOpen] = useState(false)
+  const debouncedAddQuery = useDebounce(addQuery, 300)
 
   const { data: dept, isLoading } = useQuery({
     queryKey: ['depts', deptId],
@@ -204,13 +194,8 @@ function DeptDetail({ deptId }: { deptId: string }) {
   })
 
   const addMemberMutation = useMutation({
-    mutationFn: async () => {
-      const res = await personsApi.phoneLookup([addPhone])
-      const person = res.data.results[0]?.person
-      if (!person) throw new Error('Person not found')
-      return departmentsApi.addMember(deptId, person.id)
-    },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['depts', deptId] }); toast.success('Member added'); setAddPhone('') },
+    mutationFn: (personId: string) => departmentsApi.addMember(deptId, personId),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['depts', deptId] }); toast.success('Member added'); setAddQuery('') },
     onError: (err: any) => toast.error(err.message ?? 'Failed to add member'),
   })
 
@@ -225,6 +210,14 @@ function DeptDetail({ deptId }: { deptId: string }) {
 
   const members: DepartmentMember[] = (dept as any).members ?? []
   const activeMembers = members.filter((m) => m.is_active)
+  const activeMemberIds = new Set(activeMembers.map((m) => m.person))
+
+  const { data: personSearchResults, isFetching: searchingPersons } = useQuery({
+    queryKey: ['dept-add-member-search', deptId, debouncedAddQuery],
+    queryFn: () => personsApi.list({ search: debouncedAddQuery }),
+    select: (res) => res.data.results,
+    enabled: tab === 'members' && debouncedAddQuery.trim().length >= 2,
+  })
 
   return (
     <>
@@ -243,9 +236,55 @@ function DeptDetail({ deptId }: { deptId: string }) {
 
       {tab === 'members' ? (
         <>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-            <input className="input" value={addPhone} onChange={(e) => setAddPhone(e.target.value)} placeholder="Add by phone..." style={{ flex: 1 }} onKeyDown={(e) => { if (e.key === 'Enter' && addPhone) addMemberMutation.mutate() }} />
-            <button onClick={() => addMemberMutation.mutate()} disabled={!addPhone || addMemberMutation.isPending} style={btnAccent}><UserPlus size={14} /></button>
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input
+                className="input"
+                value={addQuery}
+                onChange={(e) => setAddQuery(e.target.value)}
+                placeholder="Search by member name or phone..."
+                style={{ flex: 1 }}
+              />
+            </div>
+            <div style={{ marginTop: 8, border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+              {addQuery.trim().length < 2 ? (
+                <div style={{ padding: '10px 12px', fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>
+                  Type at least 2 characters to search members.
+                </div>
+              ) : searchingPersons ? (
+                <div style={{ padding: '10px 12px', fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>
+                  Searching...
+                </div>
+              ) : !personSearchResults || personSearchResults.length === 0 ? (
+                <div style={{ padding: '10px 12px', fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>
+                  No matching member found.
+                </div>
+              ) : (
+                personSearchResults.slice(0, 8).map((person) => {
+                  const alreadyAdded = activeMemberIds.has(person.id)
+                  return (
+                    <div key={person.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, padding: '10px 12px', borderTop: '1px solid var(--color-border)' }}>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--color-text-body)' }}>
+                          {person.first_name} {person.last_name}
+                        </div>
+                        <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>
+                          {person.phone || 'No phone'}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => addMemberMutation.mutate(person.id)}
+                        disabled={alreadyAdded || addMemberMutation.isPending}
+                        style={alreadyAdded ? btnMuted : btnAccent}
+                      >
+                        <UserPlus size={14} />
+                        {alreadyAdded ? 'Added' : 'Add'}
+                      </button>
+                    </div>
+                  )
+                })
+              )}
+            </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -354,3 +393,4 @@ const lbl: React.CSSProperties = { display: 'block', marginBottom: 6, fontSize: 
 const picked: React.CSSProperties = { fontSize: 'var(--text-xs)', color: 'var(--color-success)', background: 'var(--color-success-bg)', padding: '6px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-success)' }
 const btnGhost: React.CSSProperties = { height: 40, padding: '0 14px', border: '1.5px solid var(--color-border)', borderRadius: 'var(--radius-md)', background: 'none', cursor: 'pointer' }
 const btnAccent: React.CSSProperties = { height: 40, padding: '0 14px', background: 'var(--accent-department)', color: '#fff', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 600 }
+const btnMuted: React.CSSProperties = { height: 32, padding: '0 10px', background: 'var(--color-surface-alt)', color: 'var(--color-text-muted)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', cursor: 'not-allowed', display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 600, fontSize: 'var(--text-xs)' }

@@ -47,7 +47,7 @@ class DepartmentCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model  = Department
-        fields = ['name', 'description', 'category', 'hod', 'assistant_hod']
+        fields = ['name', 'hod', 'assistant_hod']
 
     def create(self, validated_data):
         hod_id = validated_data.pop('hod', None)
