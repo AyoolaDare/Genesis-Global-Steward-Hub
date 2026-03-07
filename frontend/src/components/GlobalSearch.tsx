@@ -68,6 +68,11 @@ export default function GlobalSearch() {
     }
   }, [open])
 
+  const select = useCallback((result: SearchResult) => {
+    navigate(`${TYPE_PATH[result.type] ?? '/'}`)
+    setOpen(false)
+  }, [navigate])
+
   // Keyboard navigation
   useEffect(() => {
     if (!open) return
@@ -80,11 +85,6 @@ export default function GlobalSearch() {
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [open, results, focused, select])
-
-  const select = useCallback((result: SearchResult) => {
-    navigate(`${TYPE_PATH[result.type] ?? '/'}`)
-    setOpen(false)
-  }, [navigate])
 
   if (!open) return null
 

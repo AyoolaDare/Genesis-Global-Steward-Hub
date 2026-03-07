@@ -79,6 +79,7 @@ function AddMembersDialog({ groupId, onClose }: { groupId: string; onClose: () =
   const [step, setStep] = useState<'input' | 'preview'>('input')
   const [results, setResults] = useState<{ phone: string; person: { id: string; first_name: string; last_name: string } | null }[]>([])
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  type FoundLookupResult = { phone: string; person: { id: string; first_name: string; last_name: string } }
 
   const lookupMutation = useMutation({
     mutationFn: () => {
@@ -104,7 +105,7 @@ function AddMembersDialog({ groupId, onClose }: { groupId: string; onClose: () =
     onError: () => toast.error('Failed to add members'),
   })
 
-  const found    = results.filter((r) => r.person)
+  const found    = results.filter((r): r is FoundLookupResult => r.person !== null)
   const notFound = results.filter((r) => !r.person)
 
   return (
