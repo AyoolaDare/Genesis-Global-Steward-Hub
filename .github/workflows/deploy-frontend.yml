@@ -47,7 +47,6 @@ jobs:
           fi
 
       - name: Deploy to Vercel (CLI)
-        working-directory: frontend
         shell: bash
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
