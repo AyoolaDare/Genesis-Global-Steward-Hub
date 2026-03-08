@@ -100,6 +100,82 @@ class PersonViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
         results = PersonService.batch_phone_lookup(serializer.validated_data['phones'])
         return Response(results)
 
+    @action(
+        detail=False, methods=['post'],
+        permission_classes=[IsAdmin],
+        url_path='bulk_import',
+        url_name='bulk-import',
+    )
+    def bulk_import(self, request):
+        import csv
+        import io
+
+        csv_file = request.FILES.get('file')
+        if not csv_file:
+            return Response(
+                {'error': 'No file uploaded. Send the CSV as form-data field "file".'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not csv_file.name.lower().endswith('.csv'):
+            return Response(
+                {'error': 'File must be a .csv file.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if csv_file.size > 5 * 1024 * 1024:
+            return Response(
+                {'error': 'File too large. Maximum allowed size is 5 MB.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            # utf-8-sig strips the BOM character Excel adds to CSV exports
+            content = csv_file.read().decode('utf-8-sig')
+        except UnicodeDecodeError:
+            return Response(
+                {'error': 'File encoding not supported. Save the CSV as UTF-8 and try again.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        reader = csv.DictReader(io.StringIO(content))
+
+        if not reader.fieldnames:
+            return Response(
+                {'error': 'CSV file is empty or missing a header row.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Normalise column names: strip whitespace, lowercase
+        normalized_fields = [f.strip().lower() for f in reader.fieldnames]
+        required_cols = {'first_name', 'last_name', 'phone'}
+        missing = required_cols - set(normalized_fields)
+        if missing:
+            return Response(
+                {'error': f'Missing required columns: {", ".join(sorted(missing))}'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        rows = [
+            {k.strip().lower(): (v or '').strip() for k, v in row.items()}
+            for row in reader
+        ]
+
+        if not rows:
+            return Response(
+                {'error': 'CSV has no data rows.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if len(rows) > 500:
+            return Response(
+                {'error': f'Too many rows ({len(rows)}). Maximum is 500 per import.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        result = PersonService.bulk_import_csv(rows=rows, imported_by=request.user)
+        return Response(result, status=status.HTTP_200_OK)
+
     @action(detail=True, methods=['get'], url_path='board')
     def board(self, request, pk=None):
         person = self.get_object()

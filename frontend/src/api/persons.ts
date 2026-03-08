@@ -41,6 +41,17 @@ export interface PaginatedResponse<T> {
   count?:   number
 }
 
+export interface BulkImportResult {
+  created: number
+  skipped: number
+  skipped_details: Array<{ row: number; phone: string; reason: string }>
+  errors: Array<{
+    row: number
+    data: { first_name: string; last_name: string; phone: string }
+    errors: string[]
+  }>
+}
+
 export interface CreatePersonPayload {
   first_name:         string
   last_name:          string
@@ -146,4 +157,12 @@ export const personsApi = {
       '/persons/phone_lookup/',
       { phones },
     ),
+
+  bulkImport: (file: File) => {
+    const form = new FormData()
+    form.append('file', file)
+    return api.post<BulkImportResult>('/persons/bulk_import/', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
 }

@@ -5,14 +5,16 @@ import {
   useReactTable, getCoreRowModel, flexRender,
   type ColumnDef,
 } from '@tanstack/react-table'
-import { UserPlus, Search, Filter, X } from 'lucide-react'
+import { UserPlus, Upload, Search, Filter, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { personsApi, type PersonListItem, type PersonStatus, type PersonSource } from '@/api/persons'
 import StatusBadge from '@/components/ui/StatusBadge'
 import Modal from '@/components/ui/Modal'
 import PersonForm from '@/components/persons/PersonForm'
+import CsvImportModal from '@/components/persons/CsvImportModal'
 import { format } from 'date-fns'
 import { useDebounce } from '@/hooks/useDebounce'
+import { useAuthStore } from '@/store/authStore'
 import toast from 'react-hot-toast'
 
 const STATUS_OPTIONS: { value: PersonStatus | ''; label: string }[] = [
@@ -36,11 +38,15 @@ const SOURCE_OPTIONS: { value: PersonSource | ''; label: string }[] = [
 
 export default function PeoplePage() {
   const navigate = useNavigate()
+  const role = useAuthStore((s) => s.user?.role)
+  const isAdmin = role === 'ADMIN'
+
   const [search,   setSearch]   = useState('')
   const [status,   setStatus]   = useState<PersonStatus | ''>('')
   const [source,   setSource]   = useState<PersonSource | ''>('')
   const [cursor,   setCursor]   = useState<string | undefined>()
-  const [addOpen,    setAddOpen]    = useState(false)
+  const [addOpen,  setAddOpen]  = useState(false)
+  const [csvOpen,  setCsvOpen]  = useState(false)
 
   const debouncedSearch = useDebounce(search, 300)
 
@@ -149,19 +155,37 @@ export default function PeoplePage() {
             {data?.count != null ? `${data.count} total` : 'Manage members and visitors'}
           </p>
         </div>
-        <button
-          onClick={() => setAddOpen(true)}
-          style={{
-            height: 40, padding: '0 18px',
-            background: 'var(--color-primary)', color: '#fff',
-            border: 'none', borderRadius: 'var(--radius-md)',
-            cursor: 'pointer', fontWeight: 600, fontSize: 'var(--text-sm)',
-            display: 'flex', alignItems: 'center', gap: 6,
-          }}
-        >
-          <UserPlus size={16} />
-          Register Member
-        </button>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {isAdmin && (
+            <button
+              onClick={() => setCsvOpen(true)}
+              style={{
+                height: 40, padding: '0 14px',
+                background: 'none', color: 'var(--color-text-body)',
+                border: '1.5px solid var(--color-border)',
+                borderRadius: 'var(--radius-md)',
+                cursor: 'pointer', fontWeight: 500, fontSize: 'var(--text-sm)',
+                display: 'flex', alignItems: 'center', gap: 6,
+              }}
+            >
+              <Upload size={15} />
+              Import CSV
+            </button>
+          )}
+          <button
+            onClick={() => setAddOpen(true)}
+            style={{
+              height: 40, padding: '0 18px',
+              background: 'var(--color-primary)', color: '#fff',
+              border: 'none', borderRadius: 'var(--radius-md)',
+              cursor: 'pointer', fontWeight: 600, fontSize: 'var(--text-sm)',
+              display: 'flex', alignItems: 'center', gap: 6,
+            }}
+          >
+            <UserPlus size={16} />
+            Register Member
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -369,6 +393,8 @@ export default function PeoplePage() {
       <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Member Registration">
         <MemberOnboardingSection onClose={() => setAddOpen(false)} />
       </Modal>
+
+      {csvOpen && <CsvImportModal onClose={() => setCsvOpen(false)} />}
     </div>
   )
 }

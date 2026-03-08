@@ -78,6 +78,99 @@ class PersonService:
         return target
 
     @staticmethod
+    @transaction.atomic
+    def bulk_import_csv(rows: list, imported_by) -> dict:
+        """
+        Validate and bulk-create Person records from CSV row dicts.
+        Returns a summary of created / skipped / error rows.
+        Each row dict uses lowercase column names matching BulkImportRowSerializer.
+        """
+        from .serializers import BulkImportRowSerializer
+
+        created_count = 0
+        skipped: list = []
+        errors: list  = []
+
+        # Pre-load existing phones & emails to avoid per-row DB hits
+        existing_phones = set(
+            Person.objects.filter(deleted_at__isnull=True).values_list('phone', flat=True)
+        )
+        existing_emails = set(
+            Person.objects.filter(
+                deleted_at__isnull=True,
+                email__isnull=False,
+            ).exclude(email='').values_list('email', flat=True)
+        )
+
+        persons_to_create: list = []
+
+        for i, raw_row in enumerate(rows, start=2):  # row 1 is the CSV header
+            serializer = BulkImportRowSerializer(data=raw_row)
+            if not serializer.is_valid():
+                errors.append({
+                    'row': i,
+                    'data': {
+                        'first_name': raw_row.get('first_name', ''),
+                        'last_name':  raw_row.get('last_name', ''),
+                        'phone':      raw_row.get('phone', ''),
+                    },
+                    'errors': [
+                        f"{field}: {', '.join(msgs)}"
+                        for field, msgs in serializer.errors.items()
+                    ],
+                })
+                continue
+
+            data  = serializer.validated_data
+            phone = data['phone']
+            email = data.get('email') or None
+
+            if phone in existing_phones:
+                skipped.append({'row': i, 'phone': phone, 'reason': 'Duplicate phone'})
+                continue
+
+            if email and email in existing_emails:
+                errors.append({
+                    'row': i,
+                    'data': {
+                        'first_name': data['first_name'],
+                        'last_name':  data['last_name'],
+                        'phone':      phone,
+                    },
+                    'errors': [f"email: {email} is already registered."],
+                })
+                continue
+
+            existing_phones.add(phone)
+            if email:
+                existing_emails.add(email)
+
+            persons_to_create.append(Person(
+                first_name=data['first_name'],
+                last_name=data['last_name'],
+                other_names=data.get('other_names', ''),
+                phone=phone,
+                email=email,
+                gender=data.get('gender', ''),
+                date_of_birth=data.get('date_of_birth'),
+                source=data.get('source', Person.Source.ADMIN),
+                address=data.get('address', ''),
+                state=data.get('state', ''),
+                status=Person.Status.NEW_MEMBER,
+            ))
+
+        if persons_to_create:
+            Person.objects.bulk_create(persons_to_create)
+            created_count = len(persons_to_create)
+
+        return {
+            'created': created_count,
+            'skipped': len(skipped),
+            'skipped_details': skipped,
+            'errors': errors,
+        }
+
+    @staticmethod
     def batch_phone_lookup(phones: list) -> dict:
         from core.utils.phone import normalize_phone
         normalized = [normalize_phone(p) for p in phones]

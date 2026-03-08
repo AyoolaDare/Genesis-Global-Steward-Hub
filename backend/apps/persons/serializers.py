@@ -80,3 +80,34 @@ class MergeSerializer(serializers.Serializer):
         if request and str(attrs['target_id']) == request.parser_context.get('kwargs', {}).get('pk'):
             raise serializers.ValidationError({'target_id': 'Cannot merge a profile into itself.'})
         return attrs
+
+
+class BulkImportRowSerializer(serializers.Serializer):
+    """Validates a single row from a CSV bulk-import upload."""
+    first_name   = serializers.CharField(max_length=100)
+    last_name    = serializers.CharField(max_length=100)
+    phone        = serializers.CharField(max_length=20)
+    other_names  = serializers.CharField(max_length=100, required=False, allow_blank=True, default='')
+    email        = serializers.EmailField(required=False, allow_blank=True, default=None)
+    gender       = serializers.ChoiceField(
+                       choices=['MALE', 'FEMALE', 'OTHER', ''],
+                       required=False, allow_blank=True, default='',
+                   )
+    date_of_birth = serializers.DateField(required=False, allow_null=True, default=None)
+    source       = serializers.ChoiceField(
+                       choices=Person.Source.values,
+                       required=False, default=Person.Source.ADMIN,
+                   )
+    address      = serializers.CharField(required=False, allow_blank=True, default='')
+    state        = serializers.CharField(max_length=100, required=False, allow_blank=True, default='')
+
+    def validate_phone(self, value):
+        normalized = normalize_phone(value)
+        if not normalized:
+            raise serializers.ValidationError('Invalid phone number format.')
+        return normalized
+
+    def validate_email(self, value):
+        if not value:
+            return None
+        return value
