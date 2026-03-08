@@ -73,11 +73,11 @@ function OnboardWorkerModal({ onClose }: { onClose: () => void }) {
     onSuccess: (res) => {
       const found = res.data.results[0]?.person
       if (!found) {
-        toast.error('Person not found')
+        toast.error('Member not found')
         return
       }
       setPerson(found)
-      toast.success('Person found')
+      toast.success('Member found')
     },
     onError: () => toast.error('Lookup failed'),
   })
@@ -131,16 +131,16 @@ function OnboardWorkerModal({ onClose }: { onClose: () => void }) {
     <Modal open onClose={onClose} title="Onboard Worker" width={560}>
       <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
         <button type="button" onClick={() => setMode('existing')} style={{ ...btnGhostSmall, borderColor: mode === 'existing' ? 'var(--accent-hr)' : 'var(--color-border)', color: mode === 'existing' ? 'var(--accent-hr)' : 'var(--color-text-muted)' }}>
-          Promote Existing
+          Existing Member
         </button>
         <button type="button" onClick={() => setMode('new')} style={{ ...btnGhostSmall, borderColor: mode === 'new' ? 'var(--accent-hr)' : 'var(--color-border)', color: mode === 'new' ? 'var(--accent-hr)' : 'var(--color-text-muted)' }}>
-          Add New Worker
+          New Member
         </button>
       </div>
 
       {mode === 'existing' && (
         <div style={{ marginBottom: 14 }}>
-          <label style={labelStyle}>Find person by phone</label>
+          <label style={labelStyle}>Find member by phone</label>
           <div style={{ display: 'flex', gap: 8 }}>
             <input className="input" value={lookupPhone} onChange={(e) => setLookupPhone(e.target.value)} placeholder="080XXXXXXXX" />
             <button type="button" onClick={() => lookupMutation.mutate()} style={btnPrimarySmall}><Search size={14} /></button>

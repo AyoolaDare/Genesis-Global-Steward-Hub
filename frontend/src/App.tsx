@@ -4,6 +4,7 @@ import LoginPage         from '@/pages/LoginPage'
 import AppShell          from '@/components/layout/AppShell'
 import DashboardPage     from '@/pages/DashboardPage'
 import PeoplePage        from '@/pages/PeoplePage'
+import MemberBoardPage   from '@/pages/MemberBoardPage'
 import MedicalPage       from '@/pages/MedicalPage'
 import FollowUpPage      from '@/pages/FollowUpPage'
 import CellGroupsPage    from '@/pages/CellGroupsPage'
@@ -54,6 +55,7 @@ export default function App() {
         <Route path="/dashboard"     element={<DashboardPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/people/*"      element={<PeoplePage />} />
+        <Route path="/members/:memberId" element={<MemberBoardPage />} />
         <Route
           path="/medical/*"
           element={<RoleGuard roles={['ADMIN', 'MEDICAL']}><MedicalPage /></RoleGuard>}

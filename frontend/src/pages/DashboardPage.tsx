@@ -150,7 +150,7 @@ export default function DashboardPage() {
   const navigate = useNavigate()
 
   const moduleCards = [
-    { label: 'People',       to: '/people',      accent: 'var(--accent-admin)',      icon: <Users size={24} /> },
+    { label: 'Members',      to: '/people',      accent: 'var(--accent-admin)',      icon: <Users size={24} /> },
     { label: 'Medical',      to: '/medical',     accent: 'var(--accent-medical)',     icon: <Stethoscope size={24} /> },
     { label: 'Follow-Up',    to: '/followup',    accent: 'var(--accent-followup)',    icon: <ClipboardList size={24} /> },
     { label: 'Cell Groups',  to: '/cells',       accent: 'var(--accent-cell)',        icon: <UsersRound size={24} /> },
@@ -160,7 +160,7 @@ export default function DashboardPage() {
 
   const pieData = stats
     ? [
-        { name: 'People',      value: stats.total_persons },
+        { name: 'Members',     value: stats.total_persons },
         { name: 'Follow-Ups',  value: stats.open_followups },
         { name: 'Cells',       value: stats.active_cells },
         { name: 'Departments', value: stats.departments },

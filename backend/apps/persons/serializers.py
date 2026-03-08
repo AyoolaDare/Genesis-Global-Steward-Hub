@@ -41,8 +41,9 @@ class PersonCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         request = self.context.get('request')
+        source = validated_data.get('source')
         if request and getattr(request, 'user', None) and request.user.is_authenticated:
-            if request.user.role != 'ADMIN':
+            if request.user.role != 'ADMIN' and source != Person.Source.ADMIN:
                 validated_data.setdefault('status', Person.Status.PENDING_APPROVAL)
             else:
                 validated_data.setdefault('status', Person.Status.NEW_MEMBER)
@@ -68,3 +69,14 @@ class PhoneLookupSerializer(serializers.Serializer):
 
 class MergeSerializer(serializers.Serializer):
     target_id = serializers.UUIDField()
+
+    def validate_target_id(self, value):
+        if not Person.objects.filter(pk=value, deleted_at__isnull=True).exists():
+            raise serializers.ValidationError('Target person not found or has been deleted.')
+        return value
+
+    def validate(self, attrs):
+        request = self.context.get('request')
+        if request and str(attrs['target_id']) == request.parser_context.get('kwargs', {}).get('pk'):
+            raise serializers.ValidationError({'target_id': 'Cannot merge a profile into itself.'})
+        return attrs

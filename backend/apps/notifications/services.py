@@ -1,30 +1,50 @@
+"""Notification dispatch service for in-app notifications."""
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 class NotificationService:
-    """
-    Full implementation in Phase 3.
-    Stub here so signals don't fail during Phase 1 system check.
-    """
+    """Dispatch in-app notifications to system users by role."""
 
     MESSAGES = {
-        'NEW_MEMBER_CREATED':       {'title': 'New person added',           'message': '{name} was added by the {source} team.'},
-        'PROFILE_PENDING_APPROVAL': {'title': 'Profile pending approval',   'message': '{name} needs Admin review.'},
-        'MEMBER_APPROVED':          {'title': 'Profile approved',           'message': '{name} added to follow-up queue.'},
-        'MEMBER_MERGED':            {'title': 'Profiles merged',            'message': 'Duplicate profile for {name} was merged.'},
+        'NEW_MEMBER_CREATED': {
+            'title': 'New member added',
+            'message': '{name} was added by the {source} team.',
+        },
+        'PROFILE_PENDING_APPROVAL': {
+            'title': 'Profile pending approval',
+            'message': '{name} needs Admin review.',
+        },
+        'MEMBER_APPROVED': {
+            'title': 'Profile approved',
+            'message': '{name} added to follow-up queue.',
+        },
+        'MEMBER_MERGED': {
+            'title': 'Profiles merged',
+            'message': 'Duplicate profile for {name} was merged.',
+        },
     }
 
     @classmethod
     def dispatch(cls, event: str, entity, triggered_by=None, target_roles: list = None):
-        try:
-            from apps.accounts.models import SystemUser
-            from .models import Notification
+        """Create notifications for all active users with the given roles."""
+        # Lazy imports to avoid circular dependency with signals.
+        from apps.accounts.models import SystemUser  # noqa: PLC0415
+        from .models import Notification  # noqa: PLC0415
 
+        try:
             template = cls.MESSAGES.get(event, {'title': event, 'message': ''})
-            title    = template['title']
-            message  = template['message'].format(
+            title = template['title']
+            message = template['message'].format(
                 name=getattr(entity, 'full_name', str(entity)),
                 source=getattr(entity, 'source', ''),
             )
 
-            recipients = SystemUser.objects.filter(role__in=target_roles or [], is_active=True)
+            recipients = SystemUser.objects.filter(
+                role__in=target_roles or [],
+                is_active=True,
+            )
             Notification.objects.bulk_create([
                 Notification(
                     recipient=user,
@@ -36,5 +56,9 @@ class NotificationService:
                 )
                 for user in recipients
             ])
-        except Exception:
-            pass
+        except Exception:  # noqa: BLE001
+            logger.exception(
+                "Failed to dispatch notification event=%s entity=%s",
+                event,
+                getattr(entity, 'pk', None),
+            )

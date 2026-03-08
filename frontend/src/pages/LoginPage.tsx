@@ -36,6 +36,10 @@ export default function LoginPage() {
       }
       navigate('/dashboard', { replace: true })
     } catch (err: any) {
+      if (!err.response) {
+        toast.error('Cannot reach server. Confirm backend is running on http://localhost:8000')
+        return
+      }
       toast.error(err.response?.data?.error?.message ?? 'Invalid credentials')
     }
   }

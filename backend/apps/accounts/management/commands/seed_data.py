@@ -141,21 +141,27 @@ class Command(BaseCommand):
 
         pending_persons = [p for p in persons if p.status in ('PENDING_APPROVAL', 'NEW_MEMBER')]
         for person in pending_persons:
-            task, created = FollowUpTask.objects.get_or_create(
+            existing = (
+                FollowUpTask.objects
+                .filter(person=person, task_type='NEW_MEMBER_OUTREACH')
+                .order_by('created_at')
+                .first()
+            )
+            if existing:
+                continue
+
+            FollowUpTask.objects.create(
                 person=person,
                 task_type='NEW_MEMBER_OUTREACH',
-                defaults={
-                    'status':       'ASSIGNED',
-                    'priority':     'NORMAL',
-                    'description':  f'Initial outreach for new contact {person.full_name}.',
-                    'assigned_to':  followup_user,
-                    'assigned_at':  timezone.now(),
-                    'triggered_by': 'AUTO',
-                    'created_by':   admin,
-                }
+                status='ASSIGNED',
+                priority='NORMAL',
+                description=f'Initial outreach for new contact {person.full_name}.',
+                assigned_to=followup_user,
+                assigned_at=timezone.now(),
+                triggered_by='AUTO',
+                created_by=admin,
             )
-            if created:
-                self.stdout.write(f"  ✓ FollowUp task: {person.full_name}")
+            self.stdout.write(f"  ✓ FollowUp task: {person.full_name}")
 
     def _create_dept_members(self, depts, persons):
         from apps.departments.models import DepartmentMember
@@ -172,3 +178,4 @@ class Command(BaseCommand):
                 )
             if chunk:
                 self.stdout.write(f"  ✓ Members added to {dept.name}")
+

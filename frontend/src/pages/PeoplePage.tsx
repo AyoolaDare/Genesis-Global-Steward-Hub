@@ -1,18 +1,19 @@
 import { useState, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import {
   useReactTable, getCoreRowModel, flexRender,
   type ColumnDef,
 } from '@tanstack/react-table'
 import { UserPlus, Search, Filter, X } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { personsApi, type PersonListItem, type PersonStatus, type PersonSource } from '@/api/persons'
 import StatusBadge from '@/components/ui/StatusBadge'
-import Drawer from '@/components/ui/Drawer'
 import Modal from '@/components/ui/Modal'
-import PersonDetail from '@/components/persons/PersonDetail'
 import PersonForm from '@/components/persons/PersonForm'
 import { format } from 'date-fns'
 import { useDebounce } from '@/hooks/useDebounce'
+import toast from 'react-hot-toast'
 
 const STATUS_OPTIONS: { value: PersonStatus | ''; label: string }[] = [
   { value: '', label: 'All Statuses' },
@@ -26,18 +27,19 @@ const STATUS_OPTIONS: { value: PersonStatus | ''; label: string }[] = [
 const SOURCE_OPTIONS: { value: PersonSource | ''; label: string }[] = [
   { value: '', label: 'All Sources' },
   { value: 'WALK_IN',    label: 'Walk-In' },
-  { value: 'CELL',       label: 'Cell' },
-  { value: 'MEDICAL',    label: 'Medical' },
-  { value: 'FOLLOWUP',   label: 'Follow-Up' },
+  { value: 'CELL',       label: 'Cell Group Referral' },
+  { value: 'MEDICAL',    label: 'Medical Unit' },
+  { value: 'FOLLOWUP',   label: 'Follow-Up Team' },
   { value: 'DEPARTMENT', label: 'Department' },
+  { value: 'ADMIN',      label: 'Admin Entry' },
 ]
 
 export default function PeoplePage() {
+  const navigate = useNavigate()
   const [search,   setSearch]   = useState('')
   const [status,   setStatus]   = useState<PersonStatus | ''>('')
   const [source,   setSource]   = useState<PersonSource | ''>('')
   const [cursor,   setCursor]   = useState<string | undefined>()
-  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [addOpen,    setAddOpen]    = useState(false)
 
   const debouncedSearch = useDebounce(search, 300)
@@ -60,7 +62,7 @@ export default function PeoplePage() {
       accessorFn: (row) => `${row.first_name} ${row.last_name}`,
       cell: ({ row, getValue }) => (
         <button
-          onClick={() => setSelectedId(row.original.id)}
+          onClick={() => navigate(`/members/${row.original.id}`)}
           style={{
             background: 'none', border: 'none', cursor: 'pointer', padding: 0,
             color: 'var(--color-primary)', fontWeight: 500,
@@ -141,7 +143,7 @@ export default function PeoplePage() {
               margin: 0,
             }}
           >
-            People
+            Members
           </h1>
           <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)', marginTop: 4 }}>
             {data?.count != null ? `${data.count} total` : 'Manage members and visitors'}
@@ -158,7 +160,7 @@ export default function PeoplePage() {
           }}
         >
           <UserPlus size={16} />
-          Add Person
+          Register Member
         </button>
       </div>
 
@@ -289,7 +291,7 @@ export default function PeoplePage() {
                     }}
                   >
                     <Filter size={32} style={{ opacity: 0.3, display: 'block', margin: '0 auto 12px' }} />
-                    No people found. Try adjusting your filters.
+                    No members found. Try adjusting your filters.
                   </td>
                 </tr>
               ) : (
@@ -364,22 +366,69 @@ export default function PeoplePage() {
         )}
       </div>
 
-      {/* Detail Drawer */}
-      <Drawer
-        open={!!selectedId}
-        onClose={() => setSelectedId(null)}
-        title="Person Details"
-        width={500}
-      >
-        {selectedId && (
-          <PersonDetail personId={selectedId} onClose={() => setSelectedId(null)} />
-        )}
-      </Drawer>
-
-      {/* Add Person Modal */}
-      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Add New Person">
-        <PersonForm onClose={() => setAddOpen(false)} />
+      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Member Registration">
+        <MemberOnboardingSection onClose={() => setAddOpen(false)} />
       </Modal>
+    </div>
+  )
+}
+
+function MemberOnboardingSection({ onClose }: { onClose: () => void }) {
+  const navigate = useNavigate()
+  const [mode, setMode] = useState<'new' | 'existing'>('new')
+  const [phone, setPhone] = useState('')
+  const [foundMember, setFoundMember] = useState<PersonListItem | null>(null)
+
+  const lookupMutation = useMutation({
+    mutationFn: () => personsApi.phoneLookup([phone]),
+    onSuccess: (res) => {
+      const member = res.data.results[0]?.person
+      if (!member) {
+        setFoundMember(null)
+        toast.error('No existing member found for this phone.')
+        return
+      }
+      setFoundMember(member)
+      toast.success('Existing member found')
+    },
+    onError: () => toast.error('Failed to check member'),
+  })
+
+  return (
+    <div>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+        <button type="button" onClick={() => setMode('new')} style={{ height: 34, padding: '0 12px', border: `1.5px solid ${mode === 'new' ? 'var(--color-primary)' : 'var(--color-border)'}`, background: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', color: mode === 'new' ? 'var(--color-primary)' : 'var(--color-text-muted)' }}>
+          New Member
+        </button>
+        <button type="button" onClick={() => setMode('existing')} style={{ height: 34, padding: '0 12px', border: `1.5px solid ${mode === 'existing' ? 'var(--color-primary)' : 'var(--color-border)'}`, background: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', color: mode === 'existing' ? 'var(--color-primary)' : 'var(--color-text-muted)' }}>
+          Existing Member
+        </button>
+      </div>
+
+      {mode === 'new' && (
+        <PersonForm onClose={onClose} />
+      )}
+
+      {mode === 'existing' && (
+        <div>
+          <label style={{ display: 'block', marginBottom: 6, fontSize: 'var(--text-sm)', fontWeight: 500 }}>Member Phone</label>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input className="input" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="080XXXXXXXX" />
+            <button type="button" onClick={() => lookupMutation.mutate()} style={{ height: 40, padding: '0 14px', borderRadius: 'var(--radius-md)', border: 'none', background: 'var(--color-primary)', color: '#fff', cursor: 'pointer' }}>
+              Find
+            </button>
+          </div>
+          {foundMember && (
+            <div style={{ marginTop: 12, border: '1px solid var(--color-success)', background: 'var(--color-success-bg)', borderRadius: 'var(--radius-md)', padding: 12 }}>
+              <div style={{ fontWeight: 600 }}>{foundMember.first_name} {foundMember.last_name}</div>
+              <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', marginBottom: 10 }}>{foundMember.phone}</div>
+              <button type="button" onClick={() => { onClose(); navigate(`/members/${foundMember.id}`) }} style={{ height: 34, padding: '0 12px', borderRadius: 'var(--radius-md)', border: 'none', background: 'var(--color-success)', color: '#fff', cursor: 'pointer' }}>
+                Open Member Board
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

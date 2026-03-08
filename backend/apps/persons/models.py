@@ -12,9 +12,11 @@ class Person(models.Model):
         INACTIVE         = 'INACTIVE',         'Inactive'
 
     class Source(models.TextChoices):
+        WALK_IN  = 'WALK_IN',  'Walk In'
         MEDICAL  = 'MEDICAL',  'Medical'
         FOLLOWUP = 'FOLLOWUP', 'Follow Up'
         CELL     = 'CELL',     'Cell Group'
+        DEPARTMENT = 'DEPARTMENT', 'Department'
         ADMIN    = 'ADMIN',    'Admin'
 
     id                      = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

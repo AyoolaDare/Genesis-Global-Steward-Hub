@@ -2,11 +2,12 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 
 from core.permissions import IsAdmin, IsFollowUpTeam, IsMedicalTeam, IsCellAdmin
-from core.throttles import PhoneLookupThrottle
+from core.throttles import PhoneLookupThrottle, SearchThrottle
 from core.mixins import SoftDeleteMixin
 from .models import Person
 from .serializers import (
@@ -99,6 +100,104 @@ class PersonViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
         results = PersonService.batch_phone_lookup(serializer.validated_data['phones'])
         return Response(results)
 
+    @action(detail=True, methods=['get'], url_path='board')
+    def board(self, request, pk=None):
+        person = self.get_object()
+
+        cell_memberships = [
+            {
+                'id': str(m.id),
+                'group_id': str(m.cell_group_id),
+                'group_name': m.cell_group.name,
+                'role': m.role,
+                'is_active': m.is_active,
+                'joined_date': m.joined_date,
+            }
+            for m in person.cellgroup_memberships.select_related('cell_group').order_by('-created_at')
+        ]
+
+        department_memberships = [
+            {
+                'id': str(m.id),
+                'department_id': str(m.department_id),
+                'department_name': m.department.name,
+                'role': m.role,
+                'is_active': m.is_active,
+                'joined_date': m.joined_date,
+            }
+            for m in person.department_memberships.select_related('department').order_by('-created_at')
+        ]
+
+        attendance_rows = person.attendance_records.select_related('attendance__department').order_by('-created_at')
+        attendance_summary = {'PRESENT': 0, 'ABSENT': 0, 'EXCUSED': 0, 'LATE': 0}
+        for row in attendance_rows:
+            if row.status in attendance_summary:
+                attendance_summary[row.status] += 1
+        recent_attendance = [
+            {
+                'id': str(a.id),
+                'status': a.status,
+                'session_name': a.attendance.session_name,
+                'session_date': a.attendance.session_date,
+                'department_name': a.attendance.department.name,
+            }
+            for a in attendance_rows[:10]
+        ]
+
+        medical_record = getattr(person, 'medical_record', None)
+        medical_record_data = None
+        if medical_record:
+            medical_record_data = {
+                'id': str(medical_record.id),
+                'blood_group': medical_record.blood_group,
+                'genotype': medical_record.genotype,
+                'allergies': medical_record.allergies,
+                'chronic_conditions': medical_record.chronic_conditions,
+                'disabilities': medical_record.disabilities,
+                'current_medications': medical_record.current_medications,
+                'preferred_hospital': medical_record.preferred_hospital,
+                'health_insurance_provider': medical_record.health_insurance_provider,
+                'health_insurance_number': medical_record.health_insurance_number,
+            }
+
+        medical_visits = [
+            {
+                'id': str(v.id),
+                'visit_date': v.visit_date,
+                'visit_type': v.visit_type,
+                'complaint': v.complaint,
+                'diagnosis': v.diagnosis,
+                'treatment': v.treatment,
+                'notes': v.notes,
+            }
+            for v in person.medical_visits.order_by('-visit_date', '-created_at')[:10]
+        ]
+
+        worker = getattr(person, 'worker_profile', None)
+        worker_data = None
+        if worker:
+            worker_data = {
+                'id': str(worker.id),
+                'worker_id': worker.worker_id,
+                'job_title': worker.job_title,
+                'employment_type': worker.employment_type,
+                'employment_status': worker.employment_status,
+                'onboarding_status': worker.onboarding_status,
+                'department_name': worker.department.name if worker.department else '',
+                'hire_date': worker.hire_date,
+            }
+
+        return Response({
+            'member': PersonDetailSerializer(person).data,
+            'cell_groups': cell_memberships,
+            'departments': department_memberships,
+            'attendance_summary': attendance_summary,
+            'recent_attendance': recent_attendance,
+            'medical_record': medical_record_data,
+            'medical_visits': medical_visits,
+            'worker_profile': worker_data,
+        })
+
     @action(detail=False, methods=['get'], permission_classes=[IsAdmin])
     def stats(self, request):
         from django.utils import timezone
@@ -143,9 +242,12 @@ class PersonViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
 
 
 class GlobalSearchView(APIView):
+    permission_classes = [IsAuthenticated]
+    throttle_classes = [SearchThrottle]
+
     def get(self, request):
         q = request.query_params.get('q', '').strip()
-        if len(q) < 2:
+        if len(q) < 2 or len(q) > 100:
             return Response({'results': []})
 
         from apps.cellgroups.models import CellGroup

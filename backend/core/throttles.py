@@ -9,3 +9,8 @@ class LoginRateThrottle(AnonRateThrottle):
 class PhoneLookupThrottle(UserRateThrottle):
     """30 phone-lookup calls per hour per user — prevents bulk harvesting."""
     scope = 'phone_lookup'
+
+
+class SearchThrottle(UserRateThrottle):
+    """120 global-search calls per hour per user."""
+    scope = 'search'

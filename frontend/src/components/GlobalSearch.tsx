@@ -31,12 +31,6 @@ const TYPE_ICON: Record<string, React.ReactNode> = {
   department: <Building2 size={16} />,
 }
 
-const TYPE_PATH: Record<string, string> = {
-  person:     '/people',
-  cell_group: '/cells',
-  department: '/departments',
-}
-
 export default function GlobalSearch() {
   const [open,    setOpen]    = useState(false)
   const [query,   setQuery]   = useState('')
@@ -69,7 +63,15 @@ export default function GlobalSearch() {
   }, [open])
 
   const select = useCallback((result: SearchResult) => {
-    navigate(`${TYPE_PATH[result.type] ?? '/'}`)
+    if (result.type === 'person') {
+      navigate(`/members/${result.id}`)
+    } else if (result.type === 'cell_group') {
+      navigate('/cells')
+    } else if (result.type === 'department') {
+      navigate('/departments')
+    } else {
+      navigate('/')
+    }
     setOpen(false)
   }, [navigate])
 
@@ -133,7 +135,7 @@ export default function GlobalSearch() {
             ref={inputRef}
             value={query}
             onChange={(e) => { setQuery(e.target.value); setFocused(0) }}
-            placeholder="Search people, cell groups, departments…"
+            placeholder="Search members, cell groups, departments…"
             style={{
               flex: 1,
               border: 'none',
@@ -200,7 +202,7 @@ export default function GlobalSearch() {
                   <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>{r.subtitle}</div>
                 </div>
                 <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--color-text-muted)', textTransform: 'capitalize' }}>
-                  {r.type.replace('_', ' ')}
+                  {r.type === 'person' ? 'member' : r.type.replace('_', ' ')}
                 </span>
               </button>
             ))

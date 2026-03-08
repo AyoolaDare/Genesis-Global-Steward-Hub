@@ -32,17 +32,20 @@ export const useAuthStore = create<AuthState>()(
 
       setAuth: (user, accessToken, refreshToken) => set({ user, accessToken, refreshToken }),
 
-      clearAuth: () => set({ user: null, accessToken: null, refreshToken: null }),
+      clearAuth: () => {
+        set({ user: null, accessToken: null, refreshToken: null })
+        localStorage.removeItem('cms-auth')
+      },
 
       setToken: (token) => set({ accessToken: token }),
       setRefreshToken: (token) => set({ refreshToken: token }),
     }),
     {
       name: 'cms-auth',
+      // Only persist the user profile — tokens stay in memory only.
+      // Persisting JWTs in localStorage exposes them to XSS attacks.
       partialize: (state) => ({
         user: state.user,
-        accessToken: state.accessToken,
-        refreshToken: state.refreshToken,
       }),
     },
   ),
