@@ -244,6 +244,13 @@ class PersonViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
                 'complaint': v.complaint,
                 'diagnosis': v.diagnosis,
                 'treatment': v.treatment,
+                'prescription': v.prescription,
+                'blood_pressure': v.blood_pressure,
+                'blood_sugar_level': v.blood_sugar_level,
+                'weight_kg': str(v.weight_kg) if v.weight_kg is not None else '',
+                'height_cm': str(v.height_cm) if v.height_cm is not None else '',
+                'temperature_c': str(v.temperature_c) if v.temperature_c is not None else '',
+                'pulse_rate': str(v.pulse_rate) if v.pulse_rate is not None else '',
                 'notes': v.notes,
             }
             for v in person.medical_visits.order_by('-visit_date', '-created_at')[:10]
@@ -268,6 +275,7 @@ class PersonViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
             'cell_groups': cell_memberships,
             'departments': department_memberships,
             'attendance_summary': attendance_summary,
+            'attendance_total': sum(attendance_summary.values()),
             'recent_attendance': recent_attendance,
             'medical_record': medical_record_data,
             'medical_visits': medical_visits,

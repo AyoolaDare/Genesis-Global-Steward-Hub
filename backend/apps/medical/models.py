@@ -58,6 +58,7 @@ class MedicalVisit(models.Model):
     prescription    = models.TextField(blank=True)
     next_visit_date = models.DateField(null=True, blank=True)
     blood_pressure  = models.CharField(max_length=20, blank=True)
+    blood_sugar_level = models.CharField(max_length=30, blank=True)
     weight_kg       = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     height_cm       = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     temperature_c   = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True)

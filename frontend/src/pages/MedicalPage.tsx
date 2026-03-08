@@ -15,13 +15,14 @@ const visitSchema = z.object({
   complaint:      z.string().min(1, 'Required'),
   diagnosis:      z.string().optional(),
   treatment:      z.string().optional(),
+  prescription:   z.string().optional(),
   blood_pressure: z.string().optional(),
-  temperature:    z.string().optional(),
-  weight:         z.string().optional(),
-  height:         z.string().optional(),
-  pulse:          z.string().optional(),
+  blood_sugar_level: z.string().optional(),
+  temperature_c:  z.string().optional(),
+  weight_kg:      z.string().optional(),
+  height_cm:      z.string().optional(),
+  pulse_rate:     z.string().optional(),
   notes:          z.string().optional(),
-  attended_by:    z.string().optional(),
 })
 
 type VisitForm = z.infer<typeof visitSchema>
@@ -43,6 +44,7 @@ function NewVisitModal({
     mutationFn: (data: VisitForm) =>
       medicalApi.createVisit({
         medical_record: record.id,
+        person:         record.person,
         visit_date:     new Date().toISOString().split('T')[0],
         ...data,
       }),
@@ -81,20 +83,20 @@ function NewVisitModal({
           <textarea {...register('treatment')} rows={2} style={{ ...inputStyle, height: 'auto', padding: '8px 12px', resize: 'vertical' }} placeholder="Treatment given…" />
         </div>
 
+        <div style={{ marginBottom: 16 }}>
+          <label style={label}>Medication Prescribed</label>
+          <textarea {...register('prescription')} rows={2} style={{ ...inputStyle, height: 'auto', padding: '8px 12px', resize: 'vertical' }} placeholder="Medication prescribed…" />
+        </div>
+
         {/* Vitals row */}
         <p style={{ fontWeight: 600, fontSize: 'var(--text-sm)', color: 'var(--color-text-primary)', margin: '0 0 12px' }}>Vitals</p>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 16 }}>
-          {(['blood_pressure', 'temperature', 'pulse', 'weight', 'height'] as const).map((f) => (
+          {(['blood_pressure', 'blood_sugar_level', 'pulse_rate', 'weight_kg', 'height_cm', 'temperature_c'] as const).map((f) => (
             <div key={f}>
               <label style={label}>{f.replace('_', ' ')}</label>
-              <input {...register(f)} style={inputStyle} placeholder={f === 'blood_pressure' ? '120/80' : f === 'temperature' ? '36.5°C' : f === 'weight' ? 'kg' : f === 'height' ? 'cm' : 'bpm'} />
+              <input {...register(f)} style={inputStyle} placeholder={f === 'blood_pressure' ? '120/80' : f === 'blood_sugar_level' ? '90 mg/dL' : f === 'temperature_c' ? '36.5' : f === 'weight_kg' ? '70' : f === 'height_cm' ? '170' : '78'} />
             </div>
           ))}
-        </div>
-
-        <div style={{ marginBottom: 16 }}>
-          <label style={label}>Attended By</label>
-          <input {...register('attended_by')} style={inputStyle} placeholder="Dr. / Nurse name" />
         </div>
 
         <div style={{ marginBottom: 20 }}>
@@ -196,14 +198,16 @@ function RecordView({ record }: { record: MedicalRecord }) {
                 )}
               </div>
               <p style={{ margin: '0 0 6px', fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--color-text-primary)' }}>{v.complaint}</p>
-              {v.diagnosis && <p style={{ margin: '0 0 4px', fontSize: 'var(--text-sm)', color: 'var(--color-text-body)' }}><strong>Dx:</strong> {v.diagnosis}</p>}
-              {v.treatment && <p style={{ margin: 0, fontSize: 'var(--text-sm)', color: 'var(--color-text-body)' }}><strong>Rx:</strong> {v.treatment}</p>}
-              {(v.blood_pressure || v.temperature || v.pulse) && (
+              {v.diagnosis && <p style={{ margin: '0 0 4px', fontSize: 'var(--text-sm)', color: 'var(--color-text-body)' }}><strong>Diagnosis:</strong> {v.diagnosis}</p>}
+              {v.treatment && <p style={{ margin: 0, fontSize: 'var(--text-sm)', color: 'var(--color-text-body)' }}><strong>Treatment:</strong> {v.treatment}</p>}
+              {v.prescription && <p style={{ margin: '4px 0 0', fontSize: 'var(--text-sm)', color: 'var(--color-text-body)' }}><strong>Medication:</strong> {v.prescription}</p>}
+              {(v.blood_pressure || v.blood_sugar_level || v.temperature_c || v.pulse_rate || v.weight_kg) && (
                 <div style={{ display: 'flex', gap: 12, marginTop: 8, flexWrap: 'wrap' }}>
                   {v.blood_pressure && <span style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>BP: {v.blood_pressure}</span>}
-                  {v.temperature    && <span style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Temp: {v.temperature}</span>}
-                  {v.pulse          && <span style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Pulse: {v.pulse}</span>}
-                  {v.weight         && <span style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Wt: {v.weight}</span>}
+                  {v.blood_sugar_level && <span style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Sugar: {v.blood_sugar_level}</span>}
+                  {v.temperature_c && <span style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Temp: {v.temperature_c}°C</span>}
+                  {v.pulse_rate && <span style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Pulse: {v.pulse_rate}</span>}
+                  {v.weight_kg && <span style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>Wt: {v.weight_kg} kg</span>}
                 </div>
               )}
             </div>

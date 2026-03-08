@@ -155,7 +155,10 @@ class PersonService:
                 date_of_birth=data.get('date_of_birth'),
                 source=data.get('source', Person.Source.ADMIN),
                 address=data.get('address', ''),
+                landmark=data.get('landmark', ''),
                 state=data.get('state', ''),
+                occupation=data.get('occupation', ''),
+                marital_status=data.get('marital_status', ''),
                 status=Person.Status.NEW_MEMBER,
             ))
 
@@ -177,16 +180,18 @@ class PersonService:
         found_qs   = Person.objects.filter(phone__in=normalized, deleted_at__isnull=True)
         found_map  = {p.phone: p for p in found_qs}
 
-        results = {'found': [], 'not_found': []}
+        results_list = []
+        found = []
+        not_found = []
         for phone in normalized:
             if phone in found_map:
-                results['found'].append({
-                    'phone':  phone,
-                    'person': PersonListSerializer(found_map[phone]).data,
-                })
+                entry = {'phone': phone, 'person': PersonListSerializer(found_map[phone]).data}
+                results_list.append(entry)
+                found.append(entry)
             else:
-                results['not_found'].append({'phone': phone})
-        return results
+                results_list.append({'phone': phone, 'person': None})
+                not_found.append({'phone': phone})
+        return {'results': results_list, 'found': found, 'not_found': not_found}
 
 
 # Avoid circular import — import here

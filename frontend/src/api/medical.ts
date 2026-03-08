@@ -19,14 +19,17 @@ export interface MedicalVisit {
   id:              string
   medical_record:  string
   visit_date:      string
+  visit_type?:     string
   complaint:       string
   diagnosis:       string
   treatment:       string
+  prescription?:   string
   blood_pressure:  string
-  temperature:     string
-  weight:          string
-  height:          string
-  pulse:           string
+  blood_sugar_level?: string
+  temperature_c?:  string
+  weight_kg?:      string
+  height_cm?:      string
+  pulse_rate?:     string
   notes:           string
   attended_by:     string
   created_at:      string
@@ -46,15 +49,19 @@ export interface CreateRecordPayload {
 
 export interface CreateVisitPayload {
   medical_record: string
+  person?:        string
   visit_date:     string
   complaint:      string
+  visit_type?:    string
   diagnosis?:     string
   treatment?:     string
+  prescription?:  string
   blood_pressure?: string
-  temperature?:   string
-  weight?:        string
-  height?:        string
-  pulse?:         string
+  blood_sugar_level?: string
+  temperature_c?: string
+  weight_kg?:     string
+  height_cm?:     string
+  pulse_rate?:    string
   notes?:         string
   attended_by?:   string
 }

@@ -26,5 +26,5 @@ class MedicalVisitCreateSerializer(serializers.ModelSerializer):
         model  = MedicalVisit
         fields = ['person', 'medical_record', 'visit_date', 'visit_type', 'complaint',
                   'diagnosis', 'treatment', 'prescription', 'next_visit_date',
-                  'blood_pressure', 'weight_kg', 'height_cm', 'temperature_c',
+                  'blood_pressure', 'blood_sugar_level', 'weight_kg', 'height_cm', 'temperature_c',
                   'pulse_rate', 'attachments', 'notes']

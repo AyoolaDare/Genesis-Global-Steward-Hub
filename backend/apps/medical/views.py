@@ -53,8 +53,11 @@ class MedicalVisitViewSet(mixins.CreateModelMixin,
     def get_queryset(self):
         qs        = super().get_queryset()
         person_id = self.request.query_params.get('person_id')
+        medical_record_id = self.request.query_params.get('medical_record')
         if person_id:
             qs = qs.filter(person_id=person_id)
+        if medical_record_id:
+            qs = qs.filter(medical_record_id=medical_record_id)
         return qs
 
     def perform_create(self, serializer):

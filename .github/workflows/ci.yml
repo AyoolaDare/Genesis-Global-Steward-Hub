@@ -113,4 +113,4 @@ jobs:
         working-directory: frontend
         run: npm run build
         env:
-          VITE_API_URL: https://genesis-global-steward-hub.onrender.com/api/v1
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}

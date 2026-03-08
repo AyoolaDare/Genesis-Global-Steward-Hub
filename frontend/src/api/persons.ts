@@ -15,10 +15,12 @@ export interface Person {
   status:              PersonStatus
   source:              PersonSource
   address:             string
-  occupation:          string
-  marital_status:      string
-  water_baptism:       boolean
-  holy_ghost_baptism:  boolean
+  landmark?:           string
+  state?:              string
+  occupation?:         string
+  marital_status?:     string
+  water_baptism?:      boolean
+  holy_ghost_baptism?: boolean
   created_at:          string
   updated_at:          string
   has_medical_record?: boolean
@@ -62,6 +64,8 @@ export interface CreatePersonPayload {
   date_of_birth?:     string
   source:             PersonSource
   address?:           string
+  landmark?:          string
+  state?:             string
   occupation?:        string
   marital_status?:    string
   water_baptism?:     boolean
@@ -87,6 +91,7 @@ export interface MemberBoard {
     joined_date: string
   }>
   attendance_summary: Record<'PRESENT' | 'ABSENT' | 'EXCUSED' | 'LATE', number>
+  attendance_total: number
   recent_attendance: Array<{
     id: string
     status: 'PRESENT' | 'ABSENT' | 'EXCUSED' | 'LATE'
@@ -113,6 +118,13 @@ export interface MemberBoard {
     complaint: string
     diagnosis: string
     treatment: string
+    prescription: string
+    blood_pressure: string
+    blood_sugar_level: string
+    weight_kg: string
+    height_cm: string
+    temperature_c: string
+    pulse_rate: string
     notes: string
   }>
   worker_profile: null | {
@@ -150,7 +162,7 @@ export const personsApi = {
     api.post(`/persons/${id}/approve/`),
 
   merge: (primaryId: string, duplicateId: string) =>
-    api.post(`/persons/${primaryId}/merge/`, { duplicate_id: duplicateId }),
+    api.post(`/persons/${primaryId}/merge/`, { target_id: duplicateId }),
 
   phoneLookup: (phones: string[]) =>
     api.post<{ results: { phone: string; person: PersonListItem | null }[] }>(

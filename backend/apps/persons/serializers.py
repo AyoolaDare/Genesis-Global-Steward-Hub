@@ -28,7 +28,8 @@ class PersonCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model  = Person
         fields = ['first_name', 'last_name', 'other_names', 'phone', 'gender',
-                  'email', 'source', 'date_of_birth', 'address', 'state']
+                  'email', 'source', 'date_of_birth', 'address', 'landmark', 'state',
+                  'occupation', 'marital_status']
 
     def validate_phone(self, value):
         normalized = normalize_phone(value)
@@ -54,7 +55,8 @@ class PersonUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model  = Person
         fields = ['first_name', 'last_name', 'other_names', 'email', 'gender',
-                  'date_of_birth', 'address', 'state', 'country', 'status',
+                  'date_of_birth', 'address', 'landmark', 'state', 'occupation', 'marital_status',
+                  'country', 'status',
                   'emergency_contact_name', 'emergency_contact_phone',
                   'joined_date', 'baptized', 'baptism_date', 'is_profile_complete']
 
@@ -98,8 +100,11 @@ class BulkImportRowSerializer(serializers.Serializer):
                        choices=Person.Source.values,
                        required=False, default=Person.Source.ADMIN,
                    )
-    address      = serializers.CharField(required=False, allow_blank=True, default='')
-    state        = serializers.CharField(max_length=100, required=False, allow_blank=True, default='')
+    address        = serializers.CharField(required=False, allow_blank=True, default='')
+    landmark       = serializers.CharField(max_length=255, required=False, allow_blank=True, default='')
+    state          = serializers.CharField(max_length=100, required=False, allow_blank=True, default='')
+    occupation     = serializers.CharField(max_length=150, required=False, allow_blank=True, default='')
+    marital_status = serializers.CharField(max_length=30, required=False, allow_blank=True, default='')
 
     def validate_phone(self, value):
         normalized = normalize_phone(value)
