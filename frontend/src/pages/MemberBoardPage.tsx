@@ -25,7 +25,7 @@ export default function MemberBoardPage() {
 
       <section style={sectionStyle}>
         <h1 style={{ margin: '0 0 10px', fontSize: 'var(--text-2xl)' }}>{data.member.first_name} {data.member.last_name}</h1>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+        <div style={gridStyle}>
           <KV label="Phone Number" value={data.member.phone} />
           <KV label="Email" value={data.member.email || '-'} />
           <KV label="Date of Birth" value={data.member.date_of_birth ? format(new Date(data.member.date_of_birth), 'PPP') : '-'} />
@@ -37,20 +37,22 @@ export default function MemberBoardPage() {
         </div>
       </section>
 
-      <section style={{ ...sectionStyle, border: '2px solid var(--color-primary)' }}>
-        <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', marginBottom: 6 }}>Attendance Count</div>
-        <div style={{ fontSize: 44, fontWeight: 800, color: 'var(--color-primary)', lineHeight: 1 }}>{data.attendance_total}</div>
-        <div style={{ marginTop: 8, fontSize: 'var(--text-sm)', fontWeight: 700 }}>
+      <section style={sectionStyle}>
+        <h3 style={h3Style}>Attendance Count</h3>
+        <div style={boxStyle}>
+          <div style={{ fontSize: 44, fontWeight: 800, color: 'var(--color-primary)', lineHeight: 1, marginBottom: 8 }}>{data.attendance_total}</div>
+          <div style={{ fontSize: 'var(--text-sm)', fontWeight: 700 }}>
           Present: {data.attendance_summary.PRESENT} | Absent: {data.attendance_summary.ABSENT} | Late: {data.attendance_summary.LATE} | Excused: {data.attendance_summary.EXCUSED}
+          </div>
         </div>
       </section>
 
       <section style={sectionStyle}>
         <h3 style={h3Style}>Medical Record</h3>
         {!data.medical_record ? (
-          <p style={pStyle}>No medical record yet.</p>
+          <div style={boxStyle}><p style={pStyle}>No medical record yet.</p></div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+          <div style={gridStyle}>
             <KV label="Blood Group" value={data.medical_record.blood_group || '-'} />
             <KV label="Genotype" value={data.medical_record.genotype || '-'} />
             <KV label="Current Medications" value={data.medical_record.current_medications.join(', ') || '-'} />
@@ -64,10 +66,10 @@ export default function MemberBoardPage() {
       <section style={sectionStyle}>
         <h3 style={h3Style}>Last Check-Up History</h3>
         {data.medical_visits.length === 0 ? (
-          <p style={pStyle}>No check-up history recorded.</p>
+          <div style={boxStyle}><p style={pStyle}>No check-up history recorded.</p></div>
         ) : (
           data.medical_visits.map((v) => (
-            <div key={v.id} style={rowCardStyle}>
+            <div key={v.id} style={boxStyle}>
               <div style={{ fontSize: 'var(--text-sm)', fontWeight: 700, marginBottom: 4 }}>{format(new Date(v.visit_date), 'PPP')} - {v.visit_type}</div>
               <div style={miniGridStyle}>
                 <KV label="BP" value={v.blood_pressure || '-'} />
@@ -88,7 +90,7 @@ export default function MemberBoardPage() {
 
       <section style={sectionStyle}>
         <h3 style={h3Style}>Cell Group</h3>
-        {data.cell_groups.length === 0 ? <p style={pStyle}>No cell group membership.</p> : data.cell_groups.map((g) => (
+        {data.cell_groups.length === 0 ? <div style={boxStyle}><p style={pStyle}>No cell group membership.</p></div> : data.cell_groups.map((g) => (
           <div key={g.id} style={listRowStyle}>
             <span style={{ fontWeight: 600 }}>{g.group_name}</span>
             <span>{g.role}</span>
@@ -99,7 +101,7 @@ export default function MemberBoardPage() {
 
       <section style={sectionStyle}>
         <h3 style={h3Style}>Department</h3>
-        {data.departments.length === 0 ? <p style={pStyle}>No department membership.</p> : data.departments.map((d) => (
+        {data.departments.length === 0 ? <div style={boxStyle}><p style={pStyle}>No department membership.</p></div> : data.departments.map((d) => (
           <div key={d.id} style={listRowStyle}>
             <span style={{ fontWeight: 600 }}>{d.department_name}</span>
             <span>{d.role}</span>
@@ -113,16 +115,17 @@ export default function MemberBoardPage() {
 
 function KV({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{ background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }}>
-      <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', marginBottom: 4 }}>{label}</div>
+    <div style={boxStyle}>
+      <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-primary)', opacity: 0.75, marginBottom: 4 }}>{label}</div>
       <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-primary)', fontWeight: 600 }}>{value}</div>
     </div>
   )
 }
 
 const sectionStyle = { background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-4)', marginBottom: 'var(--space-4)' }
+const boxStyle = { background: 'var(--color-surface-alt)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: '10px 12px' }
+const gridStyle = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }
 const h3Style = { margin: '0 0 10px', fontSize: 'var(--text-lg)' }
 const pStyle = { margin: 0, color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }
-const rowCardStyle = { border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: 12, marginBottom: 10, background: 'var(--color-bg)' }
 const miniGridStyle = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 8, marginBottom: 8 }
-const listRowStyle = { display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 8, borderBottom: '1px solid var(--color-border)', padding: '10px 0', fontSize: 'var(--text-sm)' }
+const listRowStyle = { ...boxStyle, display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 8, fontSize: 'var(--text-sm)', marginBottom: 8 }
