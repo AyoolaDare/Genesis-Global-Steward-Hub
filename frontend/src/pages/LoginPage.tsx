@@ -65,7 +65,7 @@ export default function LoginPage() {
         <div style={{ textAlign: 'center', marginBottom: 'var(--space-8)' }}>
           <img
             src="/app-logo.png"
-            alt="Church CMS"
+            alt="Genesis Global Steward Hub"
             style={{
               width: 56,
               height: 56,
@@ -83,7 +83,7 @@ export default function LoginPage() {
               margin: 0,
             }}
           >
-            Church CMS
+            Genesis Global Steward Hub
           </h1>
           <p
             style={{
@@ -256,7 +256,7 @@ export default function LoginPage() {
             marginTop: 'var(--space-6)',
           }}
         >
-          Church Management System · All rights reserved
+          Genesis Global Steward Hub · All rights reserved
         </p>
       </div>
 

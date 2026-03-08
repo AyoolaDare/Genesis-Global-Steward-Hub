@@ -9,6 +9,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
 import { useDebounce } from '@/hooks/useDebounce'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import Drawer from '@/components/ui/Drawer'
 import Modal from '@/components/ui/Modal'
 import {
@@ -48,6 +49,7 @@ type OnboardForm = z.infer<typeof onboardSchema>
 
 function OnboardWorkerModal({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient()
+  const isMobile = useIsMobile()
   const [mode, setMode] = useState<'existing' | 'new'>('existing')
   const [lookupPhone, setLookupPhone] = useState('')
   const [person, setPerson] = useState<any>(null)
@@ -156,7 +158,7 @@ function OnboardWorkerModal({ onClose }: { onClose: () => void }) {
 
       {mode === 'new' && (
         <div style={{ marginBottom: 14 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10, marginBottom: 10 }}>
             <div>
               <label style={labelStyle}>First name</label>
               <input className="input" value={newPerson.first_name} onChange={(e) => setNewPerson((v) => ({ ...v, first_name: e.target.value }))} />
@@ -166,7 +168,7 @@ function OnboardWorkerModal({ onClose }: { onClose: () => void }) {
               <input className="input" value={newPerson.last_name} onChange={(e) => setNewPerson((v) => ({ ...v, last_name: e.target.value }))} />
             </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
             <div>
               <label style={labelStyle}>Phone</label>
               <input className="input" value={newPerson.phone} onChange={(e) => setNewPerson((v) => ({ ...v, phone: e.target.value }))} placeholder="080XXXXXXXX" />
@@ -186,7 +188,7 @@ function OnboardWorkerModal({ onClose }: { onClose: () => void }) {
           {errors.job_title && <p style={errorStyle}>{errors.job_title.message}</p>}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12, marginBottom: 12 }}>
           <div>
             <label style={labelStyle}>Employment type</label>
             <select className="input" {...register('employment_type')}>
@@ -203,7 +205,7 @@ function OnboardWorkerModal({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12, marginBottom: 20 }}>
           <div>
             <label style={labelStyle}>Salary amount</label>
             <input className="input" {...register('salary_amount')} placeholder="e.g. 150000" />
@@ -235,6 +237,7 @@ function OnboardWorkerModal({ onClose }: { onClose: () => void }) {
 
 function WorkerDrawer({ workerId, onClose }: { workerId: string; onClose: () => void }) {
   const queryClient = useQueryClient()
+  const isMobile = useIsMobile()
   const { data: worker, isLoading } = useQuery({
     queryKey: ['hr', workerId],
     queryFn: () => hrApi.detail(workerId),
@@ -308,7 +311,7 @@ function WorkerDrawer({ workerId, onClose }: { workerId: string; onClose: () => 
       <div style={kvRow}><span style={muted}>Onboarding</span><span>{safeWorker.onboarding_status}</span></div>
 
       <h4 style={{ marginTop: 20, marginBottom: 8 }}>Onboarding / Payroll Setup</h4>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
         <input className="input" placeholder="Salary amount" value={form.salary_amount} onChange={(e) => setForm((v) => ({ ...v, salary_amount: e.target.value }))} />
         <select className="input" value={form.pay_frequency} onChange={(e) => setForm((v) => ({ ...v, pay_frequency: e.target.value }))}>
           <option value="MONTHLY">Monthly</option>

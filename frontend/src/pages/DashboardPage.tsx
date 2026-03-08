@@ -10,6 +10,7 @@ import {
 import { dashboardApi } from '@/api/dashboard'
 import { useNavigate } from 'react-router-dom'
 import { format } from 'date-fns'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 /* ─── Stat Card ──────────────────────────────────────── */
 interface StatCardProps {
@@ -148,6 +149,7 @@ export default function DashboardPage() {
   })
 
   const navigate = useNavigate()
+  const isMobile = useIsMobile()
 
   const moduleCards = [
     { label: 'Members',      to: '/people',      accent: 'var(--accent-admin)',      icon: <Users size={24} /> },
@@ -220,7 +222,7 @@ export default function DashboardPage() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '2fr 1fr',
+          gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr',
           gap: 'var(--space-6)',
           marginBottom: 'var(--space-8)',
         }}
@@ -348,7 +350,7 @@ export default function DashboardPage() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
+          gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
           gap: 'var(--space-4)',
           marginBottom: 'var(--space-8)',
         }}
@@ -411,7 +413,7 @@ export default function DashboardPage() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
+          gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
           gap: 'var(--space-6)',
         }}
       >

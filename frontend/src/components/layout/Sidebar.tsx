@@ -85,9 +85,9 @@ export default function Sidebar({ unreadCount, isMobile = false, open = false, o
           overflow: 'hidden',
         }}
       >
-        <img src="/app-logo.png" alt="Church CMS" style={{ width: 28, height: 28, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} />
+        <img src="/app-logo.png" alt="Steward Hub" style={{ width: 28, height: 28, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} />
         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'var(--text-md)', color: 'var(--color-text-primary)', whiteSpace: 'nowrap' }}>
-          Church CMS
+          Steward Hub
         </span>
       </div>
 

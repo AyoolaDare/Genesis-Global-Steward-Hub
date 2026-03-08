@@ -4,10 +4,13 @@ import { useQuery } from '@tanstack/react-query'
 import Sidebar from './Sidebar'
 import Topbar from './Topbar'
 import api from '@/lib/axios'
+import { useKeepAlive } from '@/hooks/useKeepAlive'
 
 export default function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+
+  useKeepAlive()
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 1024)

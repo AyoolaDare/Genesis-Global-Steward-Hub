@@ -170,7 +170,7 @@ SIMPLE_JWT = {
 
 # drf-spectacular (Swagger/OpenAPI)
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Church Management System API',
+    'TITLE': 'Genesis Global Steward Hub API',
     'DESCRIPTION': 'Internal operations API for church management.',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,

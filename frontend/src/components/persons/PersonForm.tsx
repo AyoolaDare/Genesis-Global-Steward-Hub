@@ -4,6 +4,7 @@ import { z } from 'zod'
 import toast from 'react-hot-toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { personsApi, type CreatePersonPayload, type Person } from '@/api/persons'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 const schema = z.object({
   first_name:         z.string().min(1, 'Required'),
@@ -38,6 +39,7 @@ const FIELD_LABEL: Record<string, string> = {
 export default function PersonForm({ person, onClose }: Props) {
   const queryClient = useQueryClient()
   const isEdit = !!person
+  const isMobile = useIsMobile()
 
   const {
     register,
@@ -117,7 +119,7 @@ export default function PersonForm({ person, onClose }: Props) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 'var(--space-4)' }}>
         <div>{field('first_name')}</div>
         <div>{field('last_name')}</div>
       </div>
@@ -125,7 +127,7 @@ export default function PersonForm({ person, onClose }: Props) {
       {field('phone', 'tel')}
       {field('email', 'email')}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 'var(--space-4)' }}>
         <div style={{ marginBottom: 'var(--space-4)' }}>
           <label style={labelStyle}>Gender</label>
           <select className="input" style={inputStyle(!!errors.gender)} {...register('gender')}>
