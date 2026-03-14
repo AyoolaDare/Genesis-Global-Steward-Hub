@@ -234,7 +234,7 @@ function NewCampaignModal({ onClose }: { onClose: () => void }) {
               <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: 3 }}>
                 <Tag size={11} /> Insert tag:
               </span>
-              {MERGE_TAGS.map(({ tag, label }) => (
+              {MERGE_TAGS.map(({ tag }) => (
                 <button
                   key={tag}
                   type="button"

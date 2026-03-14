@@ -7,17 +7,17 @@
  *    with no back navigation to other departments.
  *  - If exec belongs to multiple depts → department switcher dropdown.
  */
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend,
-  LineChart, Line, PieChart, Pie, Cell,
+  PieChart, Pie, Cell,
 } from 'recharts'
 import {
   ArrowLeft, Building2, Users, CalendarDays, TrendingUp,
-  AlertTriangle, Star, BookOpen, MessageSquare, Plus, ChevronDown,
-  CheckCircle2, XCircle, Clock, Send, UserMinus, UserPlus,
+  AlertTriangle, MessageSquare, Plus, ChevronDown,
+  Send, UserPlus,
   Shield, ChevronRight,
 } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
@@ -62,18 +62,6 @@ function extractApiErrorMessage(error: any, fallback: string) {
   if (typeof firstFieldError === 'string' && firstFieldError.trim()) return firstFieldError
 
   return fallback
-}
-
-function ExecBadge({ role }: { role: ExecRole }) {
-  const cfg = EXEC_ROLES[role]
-  return (
-    <span style={{
-      fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 99,
-      color: cfg.color, background: cfg.bg, letterSpacing: '0.03em',
-    }}>
-      {cfg.label}
-    </span>
-  )
 }
 
 function SessionBadge({ type }: { type: SessionType }) {
