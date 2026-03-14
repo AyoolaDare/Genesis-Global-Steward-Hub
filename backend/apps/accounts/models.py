@@ -23,13 +23,16 @@ class SystemUserManager(BaseUserManager):
 class SystemUser(AbstractBaseUser, PermissionsMixin):
 
     class Role(models.TextChoices):
-        ADMIN       = 'ADMIN',       'Admin'
-        MEDICAL     = 'MEDICAL',     'Medical Team'
-        FOLLOWUP    = 'FOLLOWUP',    'Follow Up Team'
-        CELL_ADMIN  = 'CELL_ADMIN',  'Cell Admin'
-        DEPT_LEADER = 'DEPT_LEADER', 'Department Leader'
-        DEPT_ASST   = 'DEPT_ASST',   'Department Assistant'
-        HR          = 'HR',          'HR Team'
+        ADMIN      = 'ADMIN',      'Admin'
+        MEDICAL    = 'MEDICAL',    'Medical Team'
+        FOLLOWUP   = 'FOLLOWUP',   'Follow Up Team'
+        CELL_LEADER = 'CELL_LEADER', 'Cell Leader'
+        CELL_ASST   = 'CELL_ASST',   'Cell Lead Assistant'
+        HOD        = 'HOD',        'Head of Department'
+        ASST_HOD   = 'ASST_HOD',   'Assistant Head of Department'
+        WELFARE    = 'WELFARE',    'Welfare Officer'
+        PRO        = 'PRO',        'Public Relations Officer'
+        HR         = 'HR',         'HR Team'
 
     id            = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     person        = models.OneToOneField(

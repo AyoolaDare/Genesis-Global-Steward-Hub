@@ -1,16 +1,23 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+export type UserRole =
+  | 'ADMIN' | 'MEDICAL' | 'FOLLOWUP' | 'CELL_LEADER' | 'CELL_ASST'
+  | 'HOD' | 'ASST_HOD' | 'WELFARE' | 'PRO'
+  | 'HR'
+
 export interface AuthUser {
-  id:           string
-  email:        string
-  username:     string
-  role:         string
-  module_access: string[]
-  department?:   string | null
+  id:              string
+  email:           string
+  username:        string
+  role:            UserRole
+  module_access:   string[]
+  department?:     string | null
   department_name?: string
+  person?:         string | null   // UUID of linked Person record
+  person_name?:    string | null
   must_reset_password?: boolean
-  is_active:    boolean
+  is_active:       boolean
 }
 
 interface AuthState {

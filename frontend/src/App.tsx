@@ -11,9 +11,18 @@ import CellGroupsPage    from '@/pages/CellGroupsPage'
 import DepartmentsPage   from '@/pages/DepartmentsPage'
 import HRPage            from '@/pages/HRPage'
 import NotificationsPage from '@/pages/NotificationsPage'
+import MessagingPage     from '@/pages/MessagingPage'
 import AdminUsersPage    from '@/pages/AdminUsersPage'
 import ResetPasswordPage from '@/pages/ResetPasswordPage'
 import RoleGuard         from '@/components/RoleGuard'
+
+/** Returns the correct landing page for a given role. */
+function homeFor(role: string | undefined) {
+  if (['HOD', 'ASST_HOD', 'WELFARE', 'PRO'].includes(role ?? '')) return '/departments'
+  if (['CELL_LEADER', 'CELL_ASST'].includes(role ?? '')) return '/cells'
+  if (role === 'FOLLOWUP') return '/followup'
+  return '/dashboard'
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const location = useLocation()
@@ -28,8 +37,14 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function LoginRoute({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.accessToken)
-  if (token) return <Navigate to="/dashboard" replace />
+  const role  = useAuthStore((s) => s.user?.role)
+  if (token) return <Navigate to={homeFor(role)} replace />
   return <>{children}</>
+}
+
+function RoleHomeRedirect() {
+  const role = useAuthStore((s) => s.user?.role)
+  return <Navigate to={homeFor(role)} replace />
 }
 
 export default function App() {
@@ -51,8 +66,8 @@ export default function App() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard"     element={<DashboardPage />} />
+        <Route index element={<RoleHomeRedirect />} />
+        <Route path="/dashboard"     element={<RoleGuard roles={['ADMIN','MEDICAL','FOLLOWUP','CELL_LEADER','CELL_ASST','HR','HOD','ASST_HOD','WELFARE','PRO']}><DashboardPage /></RoleGuard>} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/people/*"      element={<PeoplePage />} />
         <Route path="/members/:memberId" element={<MemberBoardPage />} />
@@ -66,11 +81,11 @@ export default function App() {
         />
         <Route
           path="/cells/*"
-          element={<RoleGuard roles={['ADMIN', 'CELL_ADMIN']}><CellGroupsPage /></RoleGuard>}
+          element={<RoleGuard roles={['ADMIN', 'CELL_LEADER', 'CELL_ASST']}><CellGroupsPage /></RoleGuard>}
         />
         <Route
           path="/departments/*"
-          element={<RoleGuard roles={['ADMIN', 'DEPT_LEADER', 'DEPT_ASST']}><DepartmentsPage /></RoleGuard>}
+          element={<RoleGuard roles={['ADMIN', 'HOD', 'ASST_HOD', 'WELFARE', 'PRO']}><DepartmentsPage /></RoleGuard>}
         />
         <Route
           path="/hr/*"
@@ -80,8 +95,12 @@ export default function App() {
           path="/admin/users"
           element={<RoleGuard roles={['ADMIN']}><AdminUsersPage /></RoleGuard>}
         />
+        <Route
+          path="/messaging/*"
+          element={<RoleGuard roles={['ADMIN', 'FOLLOWUP', 'HOD', 'ASST_HOD', 'WELFARE', 'PRO']}><MessagingPage /></RoleGuard>}
+        />
         <Route path="/notifications" element={<NotificationsPage />} />
-        <Route path="*"              element={<Navigate to="/dashboard" replace />} />
+        <Route path="*"              element={<RoleHomeRedirect />} />
       </Route>
     </Routes>
   )

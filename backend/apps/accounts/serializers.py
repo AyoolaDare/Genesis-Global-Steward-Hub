@@ -4,12 +4,17 @@ from .models import SystemUser
 
 class SystemUserSerializer(serializers.ModelSerializer):
     department_name = serializers.CharField(source='department.name', read_only=True)
+    person_name     = serializers.SerializerMethodField()
+
+    def get_person_name(self, obj):
+        return obj.person.full_name if obj.person_id else None
 
     class Meta:
         model  = SystemUser
         fields = [
             'id', 'email', 'username', 'role', 'module_access',
             'department', 'department_name',
+            'person', 'person_name',
             'must_reset_password',
             'is_active', 'last_login', 'created_at',
         ]
@@ -17,7 +22,7 @@ class SystemUserSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    email    = serializers.EmailField()
+    identifier = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
 

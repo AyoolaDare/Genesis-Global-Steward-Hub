@@ -65,6 +65,7 @@ LOCAL_APPS = [
     'apps.departments',
     'apps.hr',
     'apps.notifications',
+    'apps.messaging',
     'apps.audit',
 ]
 
@@ -190,6 +191,11 @@ CSRF_COOKIE_HTTPONLY = True
 # Email paused globally for now (no outbound delivery)
 EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 DEFAULT_FROM_EMAIL = config('EMAIL_FROM', default='noreply@yourchurch.org')
+
+# Termii SMS — set TERMII_API_KEY, TERMII_SENDER_ID, and TERMII_BASE_URL in .env / Render dashboard
+TERMII_API_KEY = config('TERMII_API_KEY', default='')
+TERMII_SENDER_ID = config('TERMII_SENDER_ID', default='')
+TERMII_BASE_URL = config('TERMII_BASE_URL', default='https://api.ng.termii.com/api')
 
 # Logging — captures security and request warnings in all environments
 LOGGING = {

@@ -4,9 +4,12 @@ export type AppRole =
   | 'ADMIN'
   | 'MEDICAL'
   | 'FOLLOWUP'
-  | 'CELL_ADMIN'
-  | 'DEPT_LEADER'
-  | 'DEPT_ASST'
+  | 'CELL_LEADER'
+  | 'CELL_ASST'
+  | 'HOD'
+  | 'ASST_HOD'
+  | 'WELFARE'
+  | 'PRO'
   | 'HR'
 
 export interface AppUser {
@@ -14,6 +17,8 @@ export interface AppUser {
   email: string
   username: string
   role: AppRole
+  person?: string | null
+  person_name?: string | null
   department?: string | null
   department_name?: string
   must_reset_password?: boolean

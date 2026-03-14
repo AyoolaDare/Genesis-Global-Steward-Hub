@@ -19,6 +19,7 @@ urlpatterns = [
     path('api/v1/depts/',         include('apps.departments.urls')),
     path('api/v1/hr/',            include('apps.hr.urls')),
     path('api/v1/notifications/', include('apps.notifications.urls')),
+    path('api/v1/messaging/',     include('apps.messaging.urls')),
     path('api/v1/audit/',         include('apps.audit.urls')),
 
     # Global search

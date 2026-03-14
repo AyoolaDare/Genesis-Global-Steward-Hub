@@ -31,3 +31,20 @@ def normalize_phone(phone: str) -> str:
         return '0' + digits
 
     return digits
+
+
+def to_international(phone: str, country_code: str = '234') -> str:
+    """
+    Convert a stored local Nigerian number (08012345678) to Termii's
+    international format (2348012345678) — no leading + sign.
+    """
+    digits = re.sub(r'\D', '', (phone or '').strip())
+    if not digits:
+        return digits
+    if digits.startswith('0') and len(digits) == 11:
+        return country_code + digits[1:]
+    if digits.startswith('234') and len(digits) >= 13:
+        return digits[:13]
+    if len(digits) == 10:
+        return country_code + digits
+    return digits

@@ -159,7 +159,7 @@ class PersonService:
                 state=data.get('state', ''),
                 occupation=data.get('occupation', ''),
                 marital_status=data.get('marital_status', ''),
-                status=Person.Status.NEW_MEMBER,
+                status=data.get('status', Person.Status.NEW_MEMBER),
             ))
 
         if persons_to_create:

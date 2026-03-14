@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 
-from core.permissions import IsAdmin, IsFollowUpTeam, IsMedicalTeam, IsCellAdmin
+from core.permissions import IsAdmin, IsFollowUpTeam, IsMedicalTeam, IsCellAdmin, IsDeptLeader
 from core.throttles import PhoneLookupThrottle, SearchThrottle
 from core.mixins import SoftDeleteMixin
 from .models import Person
@@ -33,15 +33,28 @@ class PersonViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ('destroy', 'approve', 'merge'):
             return [IsAdmin()]
-        return [(IsMedicalTeam | IsFollowUpTeam | IsAdmin | IsCellAdmin)()]
+        if self.action in ('stats', 'growth'):
+            return [IsAdmin()]
+        return [(IsMedicalTeam | IsFollowUpTeam | IsAdmin | IsCellAdmin | IsDeptLeader)()]
 
     def get_queryset(self):
         qs   = super().get_queryset()
         user = self.request.user
-        if user.role == 'CELL_ADMIN':
-            qs = qs.filter(cellgroup_memberships__cell_group__admin=user)
-        elif user.role in ('DEPT_LEADER', 'DEPT_ASST'):
-            qs = qs.filter(department_memberships__department__team_leader__system_user=user)
+        if user.role in ('CELL_LEADER', 'CELL_ASST'):
+            qs = qs.filter(
+                cellgroup_memberships__person_id=user.person_id,
+                cellgroup_memberships__is_active=True,
+                cellgroup_memberships__role__in=[
+                    'LEADER',
+                    'ASSISTANT',
+                ],
+            )
+        elif user.role in ('HOD', 'ASST_HOD', 'WELFARE', 'PRO'):
+            # Dept executives can search all registered church members to add to their dept
+            from .models import Person
+            qs = qs.filter(status__in=[
+                Person.Status.NEW_MEMBER, Person.Status.MEMBER, Person.Status.WORKER
+            ])
         search = self.request.query_params.get('search', '').strip()
         if search:
             qs = self._apply_person_search(qs, search)
@@ -204,7 +217,7 @@ class PersonViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
             for m in person.department_memberships.select_related('department').order_by('-created_at')
         ]
 
-        attendance_rows = person.attendance_records.select_related('attendance__department').order_by('-created_at')
+        attendance_rows = person.attendance_records.select_related('session', 'department').order_by('-created_at')
         attendance_summary = {'PRESENT': 0, 'ABSENT': 0, 'EXCUSED': 0, 'LATE': 0}
         for row in attendance_rows:
             if row.status in attendance_summary:
@@ -213,9 +226,9 @@ class PersonViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
             {
                 'id': str(a.id),
                 'status': a.status,
-                'session_name': a.attendance.session_name,
-                'session_date': a.attendance.session_date,
-                'department_name': a.attendance.department.name,
+                'session_name': a.session.session_name,
+                'session_date': a.session.session_date,
+                'department_name': a.department.name,
             }
             for a in attendance_rows[:10]
         ]

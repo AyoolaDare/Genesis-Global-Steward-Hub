@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useDebounce } from '@/hooks/useDebounce'
 import { usersApi, type AppRole, type AppUser } from '@/api/users'
-import { departmentsApi } from '@/api/departments'
 import Modal from '@/components/ui/Modal'
 import toast from 'react-hot-toast'
 import { UserPlus, Search } from 'lucide-react'
@@ -12,21 +11,21 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
 import type { CSSProperties } from 'react'
 
-const ROLE_OPTIONS = [
-  'ADMIN',
-  'MEDICAL',
-  'FOLLOWUP',
-  'CELL_ADMIN',
-  'DEPT_LEADER',
-  'DEPT_ASST',
-  'HR',
-] as const
-
 const createSchema = z.object({
   email: z.string().email('Enter a valid email'),
   username: z.string().min(3, 'Username must be at least 3 chars'),
-  role: z.enum(ROLE_OPTIONS),
-  department: z.string().optional().or(z.literal('')),
+  role: z.enum([
+    'ADMIN',
+    'MEDICAL',
+    'FOLLOWUP',
+    'CELL_LEADER',
+    'CELL_ASST',
+    'HOD',
+    'ASST_HOD',
+    'WELFARE',
+    'PRO',
+    'HR',
+  ]),
   password: z.string().min(8, 'Password must be at least 8 chars'),
   is_active: z.boolean().default(true),
 })
@@ -37,8 +36,34 @@ const editSchema = createSchema.extend({
 
 type EditForm = z.infer<typeof editSchema>
 
+const ROLE_OPTIONS: AppRole[] = [
+  'ADMIN',
+  'MEDICAL',
+  'FOLLOWUP',
+  'CELL_LEADER',
+  'CELL_ASST',
+  'HOD',
+  'ASST_HOD',
+  'WELFARE',
+  'PRO',
+  'HR',
+]
+
+const ROLE_LABELS: Record<AppRole, string> = {
+  ADMIN: 'Admin',
+  MEDICAL: 'Medical Team',
+  FOLLOWUP: 'Follow Up Team',
+  CELL_LEADER: 'Cell Leader',
+  CELL_ASST: 'Cell Lead Assistant',
+  HOD: 'Head of Department',
+  ASST_HOD: 'Assistant HOD',
+  WELFARE: 'Welfare Officer',
+  PRO: 'Public Relations Officer',
+  HR: 'HR Team',
+}
+
 function roleLabel(role: AppRole) {
-  return role.replace('_', ' ')
+  return ROLE_LABELS[role] ?? role
 }
 
 interface UserFormProps {
@@ -50,11 +75,6 @@ function UserForm({ initial, onClose }: UserFormProps) {
   const queryClient = useQueryClient()
   const isEdit = !!initial
   const schema = isEdit ? editSchema : createSchema
-  const { data: depts } = useQuery({
-    queryKey: ['depts', 'for-users'],
-    queryFn: () => departmentsApi.list(),
-    select: (res) => res.data.results,
-  })
 
   const {
     register,
@@ -67,12 +87,11 @@ function UserForm({ initial, onClose }: UserFormProps) {
           email: initial.email,
           username: initial.username,
           role: initial.role,
-          department: initial.department ?? '',
           is_active: initial.is_active,
           password: '',
         }
       : {
-          role: 'FOLLOWUP',
+          role: 'ADMIN',
           is_active: true,
         },
   })
@@ -84,14 +103,12 @@ function UserForm({ initial, onClose }: UserFormProps) {
           email?: string
           username?: string
           role?: AppRole
-          department?: string | null
           is_active?: boolean
           password?: string
         } = {
           email: values.email,
           username: values.username,
           role: values.role,
-          department: values.department || null,
           is_active: values.is_active,
         }
         if (values.password) payload.password = values.password
@@ -102,7 +119,6 @@ function UserForm({ initial, onClose }: UserFormProps) {
         email: values.email,
         username: values.username,
         role: values.role,
-        department: values.department || undefined,
         password: values.password as string,
         module_access: [],
       })
@@ -134,24 +150,13 @@ function UserForm({ initial, onClose }: UserFormProps) {
       <div style={{ marginBottom: 'var(--space-4)' }}>
         <label style={labelStyle}>Role</label>
         <select className="input" {...register('role')}>
-          {ROLE_OPTIONS.map((r) => (
-            <option key={r} value={r}>
-              {roleLabel(r)}
+          {ROLE_OPTIONS.map((role) => (
+            <option key={role} value={role}>
+              {roleLabel(role)}
             </option>
           ))}
         </select>
         {errors.role && <p style={errStyle}>{errors.role.message}</p>}
-      </div>
-
-      <div style={{ marginBottom: 'var(--space-4)' }}>
-        <label style={labelStyle}>Department</label>
-        <select className="input" {...register('department')}>
-          <option value="">No department</option>
-          {depts?.map((d) => (
-            <option key={d.id} value={d.id}>{d.name}</option>
-          ))}
-        </select>
-        {errors.department && <p style={errStyle}>{errors.department.message as string}</p>}
       </div>
 
       <div style={{ marginBottom: 'var(--space-4)' }}>
@@ -241,7 +246,7 @@ export default function AdminUsersPage() {
         <div>
           <h1 style={{ margin: 0, fontSize: 'var(--text-2xl)', color: 'var(--color-text-primary)' }}>Admin Users</h1>
           <p style={{ marginTop: 4, fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>
-            Create and manage app login accounts
+            Create and manage system login accounts
           </p>
         </div>
         <button
@@ -269,16 +274,16 @@ export default function AdminUsersPage() {
           <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
           <input
             className="input"
-            placeholder="Search email or username..."
+            placeholder="Search member, email, or username..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setCursor(undefined) }}
             style={{ paddingLeft: 34 }}
           />
         </div>
-        <select className="input" value={role} onChange={(e) => { setRole(e.target.value as AppRole | ''); setCursor(undefined) }} style={{ width: 190 }}>
+        <select className="input" value={role} onChange={(e) => { setRole(e.target.value as AppRole | ''); setCursor(undefined) }} style={{ width: 220 }}>
           <option value="">All roles</option>
-          {ROLE_OPTIONS.map((r) => (
-            <option key={r} value={r}>{roleLabel(r)}</option>
+          {ROLE_OPTIONS.map((item) => (
+            <option key={item} value={item}>{roleLabel(item)}</option>
           ))}
         </select>
         <select className="input" value={active} onChange={(e) => { setActive(e.target.value as 'true' | 'false' | ''); setCursor(undefined) }} style={{ width: 160 }}>
@@ -292,7 +297,7 @@ export default function AdminUsersPage() {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: 'var(--color-surface-alt)' }}>
-              {['Username', 'Email', 'Role', 'Department', 'Status', 'Last Login', 'Created', 'Actions'].map((h) => (
+              {['Member', 'Username', 'Email', 'Role', 'Department', 'Status', 'Last Login', 'Created', 'Actions'].map((h) => (
                 <th key={h} style={thStyle}>{h}</th>
               ))}
             </tr>
@@ -301,7 +306,7 @@ export default function AdminUsersPage() {
             {isLoading ? (
               Array.from({ length: 6 }).map((_, idx) => (
                 <tr key={idx}>
-                  <td colSpan={8} style={{ padding: 'var(--space-4)' }}>
+                  <td colSpan={9} style={{ padding: 'var(--space-4)' }}>
                     <div className="skeleton" style={{ height: 14 }} />
                   </td>
                 </tr>
@@ -309,6 +314,7 @@ export default function AdminUsersPage() {
             ) : data?.results?.length ? (
               data.results.map((user) => (
                 <tr key={user.id} style={{ borderTop: '1px solid var(--color-border)' }}>
+                  <td style={tdStyle}>{user.person_name ?? '—'}</td>
                   <td style={tdStyle}>{user.username}</td>
                   <td style={tdStyle}>{user.email}</td>
                   <td style={tdStyle}>{roleLabel(user.role)}</td>
@@ -340,7 +346,7 @@ export default function AdminUsersPage() {
               ))
             ) : (
               <tr>
-                <td colSpan={8} style={{ ...tdStyle, textAlign: 'center', padding: 'var(--space-8)', color: 'var(--color-text-muted)' }}>
+                <td colSpan={9} style={{ ...tdStyle, textAlign: 'center', padding: 'var(--space-8)', color: 'var(--color-text-muted)' }}>
                   No users found.
                 </td>
               </tr>

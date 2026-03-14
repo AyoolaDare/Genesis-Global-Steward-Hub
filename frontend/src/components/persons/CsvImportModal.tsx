@@ -8,13 +8,13 @@ import { personsApi, type BulkImportResult } from '@/api/persons'
 /* ─── CSV template ─────────────────────────────────────── */
 const TEMPLATE_HEADERS = [
   'first_name', 'last_name', 'phone', 'other_names',
-  'email', 'gender', 'date_of_birth', 'source', 'address', 'landmark', 'state',
+  'email', 'gender', 'date_of_birth', 'source', 'status', 'address', 'landmark', 'state',
   'occupation', 'marital_status',
 ]
 
 const TEMPLATE_EXAMPLE = [
   'John', 'Doe', '08012345678', 'Michael',
-  'john@example.com', 'MALE', '1990-05-15', 'WALK_IN', '12 Church St', 'Near First Bank', 'Lagos',
+  'john@example.com', 'MALE', '1990-05-15', 'WALK_IN', 'NEW_MEMBER', '12 Church St', 'Near First Bank', 'Lagos',
   'Engineer', 'SINGLE',
 ]
 
@@ -270,7 +270,8 @@ export default function CsvImportModal({ onClose }: Props) {
         <strong style={{ color: 'var(--color-text-primary)' }}>Optional:</strong>{' '}
         <code style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)' }}>
           other_names, email, gender (MALE/FEMALE), date_of_birth (YYYY-MM-DD),
-          source, address, landmark, state, occupation, marital_status
+          source, status (NEW_MEMBER/PENDING_APPROVAL/MEMBER/WORKER/INACTIVE),
+          address, landmark, state, occupation, marital_status
         </code>
         <br />
         Max <strong>500 rows</strong> per import. Duplicate phone numbers are skipped automatically.

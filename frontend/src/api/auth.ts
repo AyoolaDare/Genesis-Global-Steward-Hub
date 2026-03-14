@@ -2,7 +2,7 @@ import api from '@/lib/axios'
 import { AuthUser } from '@/store/authStore'
 
 export interface LoginPayload {
-  email:    string
+  identifier: string
   password: string
 }
 

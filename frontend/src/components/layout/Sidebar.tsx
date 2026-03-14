@@ -1,8 +1,8 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, Users, Stethoscope, ClipboardList,
-  UsersRound, Building2, Briefcase, Bell,
-  LogOut, Shield,
+  UsersRound, Building2, Briefcase, Bell, MessageSquare,
+  LogOut, Shield, CalendarDays,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { authApi } from '@/api/auth'
@@ -22,10 +22,36 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/people', label: 'Members', icon: <Users size={18} />, accent: 'var(--accent-admin)' },
   { to: '/medical', label: 'Medical', icon: <Stethoscope size={18} />, roles: ['ADMIN', 'MEDICAL'], accent: 'var(--accent-medical)' },
   { to: '/followup', label: 'Follow-Up', icon: <ClipboardList size={18} />, roles: ['ADMIN', 'FOLLOWUP'], accent: 'var(--accent-followup)' },
-  { to: '/cells', label: 'Cell Groups', icon: <UsersRound size={18} />, roles: ['ADMIN', 'CELL_ADMIN'], accent: 'var(--accent-cell)' },
-  { to: '/departments', label: 'Departments', icon: <Building2 size={18} />, roles: ['ADMIN', 'DEPT_LEADER', 'DEPT_ASST'], accent: 'var(--accent-department)' },
+  { to: '/cells', label: 'Cell Groups', icon: <UsersRound size={18} />, roles: ['ADMIN'], accent: 'var(--accent-cell)' },
+  { to: '/departments', label: 'Departments', icon: <Building2 size={18} />, roles: ['ADMIN'], accent: 'var(--accent-department)' },
   { to: '/hr', label: 'HR', icon: <Briefcase size={18} />, roles: ['ADMIN', 'HR'], accent: 'var(--accent-hr)' },
+  { to: '/messaging', label: 'Messaging', icon: <MessageSquare size={18} />, roles: ['ADMIN', 'FOLLOWUP'], accent: 'var(--accent-followup)' },
   { to: '/notifications', label: 'Notifications', icon: <Bell size={18} />, accent: 'var(--accent-admin)' },
+]
+
+const DEPT_EXEC_ROLES = ['HOD', 'ASST_HOD', 'WELFARE', 'PRO']
+const CELL_EXEC_ROLES = ['CELL_LEADER', 'CELL_ASST']
+
+interface DeptNavItem {
+  pathname: string
+  tab?: string
+  label: string
+  icon: React.ReactNode
+  accent: string
+}
+
+const DEPT_EXEC_NAV: DeptNavItem[] = [
+  { pathname: '/departments', label: 'Dashboard',   icon: <LayoutDashboard size={18} />, accent: 'var(--accent-department)' },
+  { pathname: '/departments', tab: 'members',    label: 'Members',    icon: <Users size={18} />,        accent: 'var(--accent-department)' },
+  { pathname: '/departments', tab: 'attendance', label: 'Attendance', icon: <CalendarDays size={18} />, accent: 'var(--accent-department)' },
+  { pathname: '/departments', tab: 'messages',   label: 'Messages',   icon: <MessageSquare size={18} />,accent: 'var(--accent-department)' },
+  { pathname: '/notifications',                  label: 'Notifications', icon: <Bell size={18} />,      accent: 'var(--accent-admin)' },
+]
+
+const CELL_EXEC_NAV: DeptNavItem[] = [
+  { pathname: '/cells', label: 'Dashboard', icon: <LayoutDashboard size={18} />, accent: 'var(--accent-cell)' },
+  { pathname: '/cells', tab: 'members', label: 'Members', icon: <Users size={18} />, accent: 'var(--accent-cell)' },
+  { pathname: '/notifications', label: 'Notifications', icon: <Bell size={18} />, accent: 'var(--accent-admin)' },
 ]
 
 interface Props {
@@ -40,6 +66,7 @@ export default function Sidebar({ unreadCount, isMobile = false, open = false, o
   const refreshToken = useAuthStore((s) => s.refreshToken)
   const clearAuth = useAuthStore((s) => s.clearAuth)
   const navigate = useNavigate()
+  const location = useLocation()
 
   const handleLogout = async () => {
     try { await authApi.logout(refreshToken) } catch { /* ignore logout errors */ }
@@ -47,6 +74,9 @@ export default function Sidebar({ unreadCount, isMobile = false, open = false, o
     navigate('/login', { replace: true })
     toast.success('Logged out')
   }
+
+  const isDeptExec  = user ? DEPT_EXEC_ROLES.includes(user.role) : false
+  const isCellExec  = user ? CELL_EXEC_ROLES.includes(user.role) : false
 
   const visibleItems = NAV_ITEMS.filter((item) => {
     if (!item.roles) return true
@@ -56,6 +86,12 @@ export default function Sidebar({ unreadCount, isMobile = false, open = false, o
   const width = 248
 
   if (isMobile && !open) return null
+
+  const tabNavIsActive = (item: DeptNavItem) => {
+    const currentTab = new URLSearchParams(location.search).get('tab') ?? 'dashboard'
+    const itemTab = item.tab ?? 'dashboard'
+    return location.pathname === item.pathname && currentTab === itemTab
+  }
 
   const sidebar = (
     <aside
@@ -92,37 +128,70 @@ export default function Sidebar({ unreadCount, isMobile = false, open = false, o
       </div>
 
       <nav style={{ flex: 1, padding: '12px 0', overflowY: 'auto' }}>
-        {visibleItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            onClick={() => { if (isMobile) onClose?.() }}
-            style={({ isActive }) => ({
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              padding: '10px 16px',
-              margin: '2px 8px',
-              borderRadius: 'var(--radius-md)',
-              textDecoration: 'none',
-              color: isActive ? item.accent : 'var(--color-text-muted)',
-              background: isActive ? `${item.accent}15` : 'transparent',
-              fontFamily: 'var(--font-body)',
-              fontSize: 'var(--text-sm)',
-              fontWeight: isActive ? 600 : 400,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-            })}
-          >
-            <span style={{ flexShrink: 0 }}>{item.icon}</span>
-            <span>{item.label}</span>
-            {item.to === '/notifications' && unreadCount > 0 && (
-              <span style={{ marginLeft: 'auto', background: 'var(--color-danger)', color: '#fff', borderRadius: 'var(--radius-full)', fontSize: 10, fontWeight: 700, padding: '1px 6px', minWidth: 18, textAlign: 'center' }}>
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </span>
-            )}
-          </NavLink>
-        ))}
+        {(isDeptExec || isCellExec) ? (
+          (isDeptExec ? DEPT_EXEC_NAV : CELL_EXEC_NAV).map((item) => {
+            const to = item.tab ? `${item.pathname}?tab=${item.tab}` : item.pathname
+            const isActive = tabNavIsActive(item)
+            return (
+              <button
+                key={to}
+                onClick={() => { navigate(to); if (isMobile) onClose?.() }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '10px 16px', margin: '2px 8px',
+                  borderRadius: 'var(--radius-md)',
+                  border: 'none', cursor: 'pointer', width: 'calc(100% - 16px)',
+                  color: isActive ? item.accent : 'var(--color-text-muted)',
+                  background: isActive ? `${item.accent}15` : 'transparent',
+                  fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)',
+                  fontWeight: isActive ? 600 : 400,
+                  whiteSpace: 'nowrap', overflow: 'hidden',
+                  textAlign: 'left',
+                }}
+              >
+                <span style={{ flexShrink: 0 }}>{item.icon}</span>
+                <span>{item.label}</span>
+                {item.pathname === '/notifications' && unreadCount > 0 && (
+                  <span style={{ marginLeft: 'auto', background: 'var(--color-danger)', color: '#fff', borderRadius: 'var(--radius-full)', fontSize: 10, fontWeight: 700, padding: '1px 6px', minWidth: 18, textAlign: 'center' }}>
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </button>
+            )
+          })
+        ) : (
+          visibleItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              onClick={() => { if (isMobile) onClose?.() }}
+              style={({ isActive }) => ({
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '10px 16px',
+                margin: '2px 8px',
+                borderRadius: 'var(--radius-md)',
+                textDecoration: 'none',
+                color: isActive ? item.accent : 'var(--color-text-muted)',
+                background: isActive ? `${item.accent}15` : 'transparent',
+                fontFamily: 'var(--font-body)',
+                fontSize: 'var(--text-sm)',
+                fontWeight: isActive ? 600 : 400,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+              })}
+            >
+              <span style={{ flexShrink: 0 }}>{item.icon}</span>
+              <span>{item.label}</span>
+              {item.to === '/notifications' && unreadCount > 0 && (
+                <span style={{ marginLeft: 'auto', background: 'var(--color-danger)', color: '#fff', borderRadius: 'var(--radius-full)', fontSize: 10, fontWeight: 700, padding: '1px 6px', minWidth: 18, textAlign: 'center' }}>
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </NavLink>
+          ))
+        )}
       </nav>
 
       <div style={{ borderTop: '1px solid var(--color-border)', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden' }}>

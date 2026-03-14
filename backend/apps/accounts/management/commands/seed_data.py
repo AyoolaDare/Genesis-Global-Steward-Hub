@@ -38,8 +38,8 @@ class Command(BaseCommand):
             {'email': 'medical@church.org',  'username': 'dr_grace',    'role': 'MEDICAL',     'password': 'Medical123!'},
             {'email': 'followup@church.org', 'username': 'pastor_james', 'role': 'FOLLOWUP',    'password': 'Followup123!'},
             {'email': 'hr@church.org',       'username': 'hr_manager',   'role': 'HR',          'password': 'HRteam123!'},
-            {'email': 'cell@church.org',     'username': 'cell_admin',   'role': 'CELL_ADMIN',  'password': 'Cell1234!'},
-            {'email': 'dept@church.org',     'username': 'dept_leader',  'role': 'DEPT_LEADER', 'password': 'Dept1234!'},
+            {'email': 'cell@church.org',     'username': 'cell_admin',   'role': 'CELL_LEADER', 'password': 'Cell1234!'},
+            {'email': 'dept@church.org',     'username': 'dept_leader',  'role': 'HOD',         'password': 'Dept1234!'},
         ]
         for u in users:
             if not SystemUser.objects.filter(email=u['email']).exists():
@@ -109,7 +109,7 @@ class Command(BaseCommand):
     def _create_cell_group(self, persons):
         from apps.cellgroups.models import CellGroup, CellGroupMember
         from apps.accounts.models import SystemUser
-        cell_admin = SystemUser.objects.filter(role='CELL_ADMIN').first()
+        cell_admin = SystemUser.objects.filter(role='CELL_LEADER').first()
         admin      = SystemUser.objects.filter(role='ADMIN').first()
 
         group, created = CellGroup.objects.get_or_create(
@@ -178,4 +178,3 @@ class Command(BaseCommand):
                 )
             if chunk:
                 self.stdout.write(f"  ✓ Members added to {dept.name}")
-

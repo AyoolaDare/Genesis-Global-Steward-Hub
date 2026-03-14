@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate
+from django.db.models import Q
 from rest_framework import status
 from rest_framework import mixins, viewsets
 from rest_framework.filters import SearchFilter
@@ -29,9 +30,16 @@ class LoginView(APIView):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        email    = serializer.validated_data['email']
+        identifier = serializer.validated_data['identifier'].strip()
         password = serializer.validated_data['password']
-        user     = authenticate(request, username=email, password=password)
+        login_user = (
+            SystemUser.objects
+            .filter(Q(email__iexact=identifier) | Q(username__iexact=identifier))
+            .first()
+        )
+        user = None
+        if login_user:
+            user = authenticate(request, username=login_user.email, password=password)
 
         if not user:
             return Response(
@@ -115,7 +123,7 @@ class SystemUserViewSet(
     queryset = SystemUser.objects.all().order_by('-created_at')
     permission_classes = [IsAdmin]
     filterset_fields = ['role', 'is_active']
-    search_fields = ['email', 'username']
+    search_fields = ['email', 'username', 'person__first_name', 'person__last_name']
     filter_backends = [DjangoFilterBackend, SearchFilter]
 
     def get_serializer_class(self):

@@ -16,16 +16,26 @@ class IsFollowUpTeam(BasePermission):
         return bool(request.user and request.user.is_authenticated and request.user.role in ('ADMIN', 'FOLLOWUP'))
 
 
+CELL_GROUP_ROLES = ('CELL_LEADER', 'CELL_ASST')
+
+
 class IsCellAdmin(BasePermission):
-    def has_permission(self, request, view):
-        return bool(request.user and request.user.is_authenticated and request.user.role in ('ADMIN', 'CELL_ADMIN'))
-
-
-class IsDeptLeader(BasePermission):
     def has_permission(self, request, view):
         return bool(
             request.user and request.user.is_authenticated and
-            request.user.role in ('ADMIN', 'DEPT_LEADER', 'DEPT_ASST')
+            request.user.role in ('ADMIN', *CELL_GROUP_ROLES)
+        )
+
+
+DEPT_EXEC_ROLES = ('HOD', 'ASST_HOD', 'WELFARE', 'PRO')
+
+
+class IsDeptLeader(BasePermission):
+    """Grants access to all 4 department executive roles (HOD, ASST_HOD, WELFARE, PRO)."""
+    def has_permission(self, request, view):
+        return bool(
+            request.user and request.user.is_authenticated and
+            request.user.role in ('ADMIN', 'HOD', 'ASST_HOD', 'WELFARE', 'PRO')
         )
 
 

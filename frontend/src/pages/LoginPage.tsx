@@ -9,7 +9,7 @@ import { authApi } from '@/api/auth'
 import { useAuthStore } from '@/store/authStore'
 
 const schema = z.object({
-  email:    z.string().email('Enter a valid email address'),
+  identifier: z.string().min(1, 'Enter your username or email'),
   password: z.string().min(1, 'Password is required'),
 })
 
@@ -107,10 +107,10 @@ export default function LoginPage() {
           }}
         >
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
-            {/* Email */}
+            {/* Username / Email */}
             <div style={{ marginBottom: 'var(--space-5)' }}>
               <label
-                htmlFor="email"
+                htmlFor="identifier"
                 style={{
                   display: 'block',
                   fontSize: 'var(--text-sm)',
@@ -119,18 +119,18 @@ export default function LoginPage() {
                   marginBottom: 'var(--space-2)',
                 }}
               >
-                Email address
+                Username or email
               </label>
               <input
-                id="email"
-                type="email"
-                autoComplete="email"
+                id="identifier"
+                type="text"
+                autoComplete="username"
                 className="input"
-                placeholder="admin@church.org"
-                style={errors.email ? { borderColor: 'var(--color-danger)' } : {}}
-                {...register('email')}
+                placeholder="ayo.sanake or admin@church.org"
+                style={errors.identifier ? { borderColor: 'var(--color-danger)' } : {}}
+                {...register('identifier')}
               />
-              {errors.email && (
+              {errors.identifier && (
                 <p
                   style={{
                     color: 'var(--color-danger)',
@@ -138,7 +138,7 @@ export default function LoginPage() {
                     marginTop: 'var(--space-1)',
                   }}
                 >
-                  {errors.email.message}
+                  {errors.identifier.message}
                 </p>
               )}
             </div>

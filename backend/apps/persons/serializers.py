@@ -105,6 +105,11 @@ class BulkImportRowSerializer(serializers.Serializer):
     state          = serializers.CharField(max_length=100, required=False, allow_blank=True, default='')
     occupation     = serializers.CharField(max_length=150, required=False, allow_blank=True, default='')
     marital_status = serializers.CharField(max_length=30, required=False, allow_blank=True, default='')
+    status         = serializers.ChoiceField(
+                         choices=Person.Status.values,
+                         required=False,
+                         default=Person.Status.NEW_MEMBER,
+                     )
 
     def validate_phone(self, value):
         normalized = normalize_phone(value)

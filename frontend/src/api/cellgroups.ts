@@ -57,4 +57,7 @@ export const cellGroupsApi = {
 
   removeMember: (groupId: string, personId: string) =>
     api.delete(`/cells/groups/${groupId}/members/${personId}/`),
+
+  updateMemberRole: (groupId: string, personId: string, role: 'MEMBER' | 'LEADER' | 'ASSISTANT') =>
+    api.patch<{ person_id: string; role: string }>(`/cells/groups/${groupId}/members/${personId}/role/`, { role }),
 }

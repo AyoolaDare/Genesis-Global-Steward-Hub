@@ -209,11 +209,11 @@ export default function DashboardPage() {
         ) : (
           <>
             <StatCard label="Total Members"      value={stats?.total_persons ?? 0}    icon={<Users size={22} />}         accent="var(--accent-admin)"      to="/people" />
-            <StatCard label="Pending Approval"   value={stats?.pending_approval ?? 0} icon={<Clock size={22} />}         accent="var(--color-warning)"     to="/people" />
-            <StatCard label="Active Workers"     value={stats?.active_workers ?? 0}   icon={<CheckCircle size={22} />}   accent="var(--accent-hr)" />
-            <StatCard label="Open Follow-Ups"    value={stats?.open_followups ?? 0}   icon={<ClipboardList size={22} />} accent="var(--accent-followup)"   to="/followup" />
-            <StatCard label="Cell Groups"        value={stats?.active_cells ?? 0}     icon={<UsersRound size={22} />}    accent="var(--accent-cell)"       to="/cells" />
-            <StatCard label="Departments"        value={stats?.departments ?? 0}       icon={<Building2 size={22} />}    accent="var(--accent-department)" to="/departments" />
+            <StatCard label="Active Workers"     value={stats?.active_workers ?? 0}   icon={<CheckCircle size={22} />}   accent="var(--accent-hr)"         to="/hr" />
+            <StatCard label="New This Month"     value={stats?.new_members ?? 0}      icon={<ClipboardList size={22} />} accent="var(--accent-followup)"   to="/people" />
+            <StatCard label="Pending Approvals"  value={stats?.pending_approval ?? 0} icon={<Clock size={22} />}         accent="var(--color-warning)"     to="/people" />
+            <StatCard label="Active Departments" value={stats?.departments ?? 0}       icon={<Building2 size={22} />}    accent="var(--accent-department)" to="/departments" />
+            <StatCard label="Active Cell Groups" value={stats?.active_cells ?? 0}     icon={<UsersRound size={22} />}    accent="var(--accent-cell)"       to="/cells" />
           </>
         )}
       </div>
