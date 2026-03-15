@@ -18,7 +18,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { to: '/dashboard',     label: 'Dashboard',    icon: <LayoutDashboard size={16} />, accent: 'var(--gg-gold-200)' },
-  { to: '/admin/users',   label: 'Admin Users',  icon: <Shield size={16} />,          roles: ['ADMIN'],             accent: 'var(--gg-gold-200)' },
+  { to: '/admin/users',   label: 'Access Control', icon: <Shield size={16} />,        roles: ['ADMIN'],             accent: 'var(--gg-gold-200)' },
   { to: '/people',        label: 'Members',      icon: <Users size={16} />,           accent: 'var(--gg-gold-200)' },
   { to: '/medical',       label: 'Medical',      icon: <Stethoscope size={16} />,     roles: ['ADMIN', 'MEDICAL'],  accent: 'var(--gg-success)' },
   { to: '/followup',      label: 'Follow-Up',    icon: <ClipboardList size={16} />,   roles: ['ADMIN', 'FOLLOWUP'], accent: 'var(--gg-blue-200)' },

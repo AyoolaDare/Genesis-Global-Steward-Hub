@@ -38,9 +38,10 @@ export interface CreateUserPayload {
   email: string
   username: string
   role: AppRole
-  department?: string
+  department?: string | null
   module_access?: string[]
   password: string
+  person?: string | null
 }
 
 export interface UpdateUserPayload {
@@ -51,6 +52,7 @@ export interface UpdateUserPayload {
   module_access?: string[]
   is_active?: boolean
   password?: string
+  person?: string | null
 }
 
 export const usersApi = {

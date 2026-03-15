@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { useAuthStore } from '@/store/authStore'
 
+const THEME_STORAGE_KEY = 'cms-theme'
+
 interface Props {
   unreadCount: number
   isMobile?: boolean
@@ -12,10 +14,16 @@ interface Props {
 export default function Topbar({ unreadCount, isMobile = false, onMenuToggle }: Props) {
   const user     = useAuthStore((s) => s.user)
   const navigate = useNavigate()
-  const [light, setLight] = useState(false)
+  const [light, setLight] = useState(() => {
+    if (typeof window === 'undefined') return false
+    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)
+    return storedTheme ? storedTheme === 'light' : true
+  })
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', light ? 'light' : 'dark')
+    const theme = light ? 'light' : 'dark'
+    document.documentElement.setAttribute('data-theme', theme)
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme)
   }, [light])
 
   const openSearch = () => {
