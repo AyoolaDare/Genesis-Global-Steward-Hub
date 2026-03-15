@@ -52,9 +52,26 @@ class WorkerProfileViewSet(viewsets.ModelViewSet):
         if WorkerProfile.objects.filter(person=person).exists():
             return Response({'error': 'Worker profile already exists.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Generate worker ID
-        count     = WorkerProfile.objects.count() + 1
-        worker_id = f"CHU-{data['hire_date'].year}-{count:04d}"
+        # Generate worker ID safely — lock the latest row for this year to prevent
+        # two concurrent promotions from producing the same ID (count()+1 is racy).
+        hire_year  = data['hire_date'].year
+        year_prefix = f"CHU-{hire_year}-"
+        last = (
+            WorkerProfile.objects
+            .filter(worker_id__startswith=year_prefix)
+            .select_for_update()
+            .order_by('-worker_id')
+            .values_list('worker_id', flat=True)
+            .first()
+        )
+        if last:
+            try:
+                next_seq = int(last.split('-')[-1]) + 1
+            except (ValueError, IndexError):
+                next_seq = WorkerProfile.objects.count() + 1
+        else:
+            next_seq = 1
+        worker_id = f"{year_prefix}{next_seq:04d}"
 
         dept = None
         if data.get('department'):
@@ -95,6 +112,7 @@ class WorkerProfileViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['patch'])
     def update_status(self, request, pk=None):
+        from datetime import date as date_type
         profile = self.get_object()
         new_status = request.data.get('employment_status')
         if new_status not in [s[0] for s in WorkerProfile.EmploymentStatus.choices]:
@@ -102,8 +120,19 @@ class WorkerProfileViewSet(viewsets.ModelViewSet):
         profile.employment_status = new_status
         update_fields = ['employment_status', 'updated_at']
         if new_status == WorkerProfile.EmploymentStatus.TERMINATED:
-            termination_date = request.data.get('termination_date')
-            profile.termination_date = termination_date or timezone.now().date()
+            raw_date = request.data.get('termination_date')
+            if raw_date:
+                try:
+                    from datetime import datetime
+                    termination_date = datetime.strptime(raw_date, '%Y-%m-%d').date()
+                except (ValueError, TypeError):
+                    return Response(
+                        {'error': 'termination_date must be in YYYY-MM-DD format.'},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            else:
+                termination_date = timezone.now().date()
+            profile.termination_date = termination_date
             profile.exit_reason = request.data.get('reason', profile.exit_reason)
             update_fields.extend(['termination_date', 'exit_reason'])
             profile.person.status = 'MEMBER'

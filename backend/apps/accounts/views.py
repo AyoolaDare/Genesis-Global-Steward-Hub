@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.auth import authenticate
 from django.db.models import Q
 from rest_framework import status
@@ -21,6 +23,8 @@ from .serializers import (
     ResetPasswordSerializer,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class LoginView(APIView):
     permission_classes  = [AllowAny]
@@ -42,16 +46,32 @@ class LoginView(APIView):
             user = authenticate(request, username=login_user.email, password=password)
 
         if not user:
+            logger.warning(
+                "LOGIN_FAILED identifier=%r ip=%s",
+                identifier,
+                request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', 'unknown')),
+            )
             return Response(
                 {'success': False, 'error': {'message': 'Invalid credentials', 'statusCode': 401}},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
         if not user.is_active:
+            logger.warning(
+                "LOGIN_INACTIVE identifier=%r ip=%s",
+                identifier,
+                request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', 'unknown')),
+            )
             return Response(
                 {'success': False, 'error': {'message': 'Account is inactive', 'statusCode': 403}},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
+        logger.info(
+            "LOGIN_SUCCESS user_id=%s role=%s ip=%s",
+            user.pk,
+            user.role,
+            request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', 'unknown')),
+        )
         refresh = RefreshToken.for_user(user)
         return Response({
             'success':      True,

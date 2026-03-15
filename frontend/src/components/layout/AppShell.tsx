@@ -32,7 +32,7 @@ export default function AppShell() {
   const unreadCount = unreadData?.data?.unread_count ?? unreadData?.data?.count ?? 0
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--color-bg)' }}>
+    <div style={{ display: 'flex', minHeight: '100vh' }}>
       <Sidebar
         unreadCount={unreadCount}
         isMobile={isMobile}
@@ -40,7 +40,11 @@ export default function AppShell() {
         onClose={() => setSidebarOpen(false)}
       />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        <Topbar unreadCount={unreadCount} isMobile={isMobile} onMenuToggle={() => setSidebarOpen(true)} />
+        <Topbar
+          unreadCount={unreadCount}
+          isMobile={isMobile}
+          onMenuToggle={() => setSidebarOpen(true)}
+        />
         <main
           id="main-content"
           style={{

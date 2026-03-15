@@ -31,21 +31,30 @@ def _get_exec_role(request, department):
     """
     Return the DepartmentExecutive role for this user in this dept.
     Primary: DepartmentExecutive table (post-overhaul).
-    Fallback: infer from SystemUser.role (pre-overhaul accounts not yet formally granted).
+    Fallback: infer from SystemUser.role ONLY when the user's formally assigned
+    department matches — prevents a legacy HOD account from gaining exec rights
+    across departments they were never explicitly granted (A01 Broken Access Control).
     """
     exec_obj = request.user.executive_access.filter(
         department=department, is_active=True
     ).first()
     if exec_obj:
         return exec_obj.role
-    # Fallback: infer exec role from SystemUser.role for accounts not yet formally granted
-    role_map = {
-        'HOD':      DepartmentExecutive.Role.HOD,
-        'ASST_HOD': DepartmentExecutive.Role.ASST_HOD,
-        'WELFARE':  DepartmentExecutive.Role.WELFARE,
-        'PRO':      DepartmentExecutive.Role.PRO,
-    }
-    return role_map.get(request.user.role)
+
+    # Fallback only when this is the user's explicitly assigned department
+    if (
+        request.user.department_id
+        and str(request.user.department_id) == str(department.pk)
+    ):
+        role_map = {
+            'HOD':      DepartmentExecutive.Role.HOD,
+            'ASST_HOD': DepartmentExecutive.Role.ASST_HOD,
+            'WELFARE':  DepartmentExecutive.Role.WELFARE,
+            'PRO':      DepartmentExecutive.Role.PRO,
+        }
+        return role_map.get(request.user.role)
+
+    return None
 
 
 def _require_roles(request, department, allowed_roles):
@@ -63,14 +72,22 @@ def _require_roles(request, department, allowed_roles):
 
 def _build_unique_username(person):
     first = (person.first_name or '').strip().lower()
-    last = (person.last_name or '').strip().lower()
-    base = '_'.join(part for part in [first, last] if part) or f'user_{str(person.id)[:8]}'
-    username = base
+    last  = (person.last_name or '').strip().lower()
+    base  = '_'.join(part for part in [first, last] if part) or f'user_{str(person.id)[:8]}'
+
+    # Fetch all conflicting usernames in one query instead of one query per suffix
+    existing = set(
+        SystemUser.objects
+        .filter(username__startswith=base)
+        .exclude(person=person)
+        .values_list('username', flat=True)
+    )
+    if base not in existing:
+        return base
     suffix = 1
-    while SystemUser.objects.filter(username=username).exclude(person=person).exists():
+    while f'{base}_{suffix}' in existing:
         suffix += 1
-        username = f'{base}_{suffix}'
-    return username
+    return f'{base}_{suffix}'
 
 
 def _build_placeholder_email(person):

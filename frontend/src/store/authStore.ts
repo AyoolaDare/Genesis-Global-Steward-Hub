@@ -49,10 +49,13 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'cms-auth',
-      // Only persist the user profile — tokens stay in memory only.
-      // Persisting JWTs in localStorage exposes them to XSS attacks.
+      // Persist user + refreshToken so sessions survive page reloads.
+      // The access token stays short-lived (15 min) in memory only.
+      // On startup, App.tsx exchanges the persisted refresh token for
+      // a new access token before any protected route is rendered.
       partialize: (state) => ({
-        user: state.user,
+        user:         state.user,
+        refreshToken: state.refreshToken,
       }),
     },
   ),

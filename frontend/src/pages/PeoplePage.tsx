@@ -14,6 +14,7 @@ import PersonForm from '@/components/persons/PersonForm'
 import CsvImportModal from '@/components/persons/CsvImportModal'
 import { format } from 'date-fns'
 import { useDebounce } from '@/hooks/useDebounce'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { useAuthStore } from '@/store/authStore'
 import toast from 'react-hot-toast'
 
@@ -401,6 +402,7 @@ export default function PeoplePage() {
 
 function MemberOnboardingSection({ onClose }: { onClose: () => void }) {
   const navigate = useNavigate()
+  const isMobile = useIsMobile()
   const [mode, setMode] = useState<'new' | 'existing'>('new')
   const [phone, setPhone] = useState('')
   const [foundMember, setFoundMember] = useState<PersonListItem | null>(null)
@@ -420,41 +422,212 @@ function MemberOnboardingSection({ onClose }: { onClose: () => void }) {
     onError: () => toast.error('Failed to check member'),
   })
 
+  const tabButtonStyle = (active: boolean) => ({
+    height: 34,
+    padding: '0 12px',
+    border: `1.5px solid ${active ? 'var(--color-primary)' : 'var(--color-border)'}`,
+    background: 'none',
+    borderRadius: 'var(--radius-md)',
+    cursor: 'pointer',
+    color: active ? 'var(--color-primary)' : 'var(--color-text-muted)',
+    fontSize: 'var(--text-sm)',
+    fontWeight: 500,
+  })
+
+  const labelStyle = {
+    display: 'block',
+    fontFamily: "'DM Sans', sans-serif",
+    fontSize: 11,
+    fontWeight: 500 as const,
+    color: 'var(--gg-text-secondary)',
+    letterSpacing: '0.07em',
+    textTransform: 'uppercase' as const,
+    marginBottom: 6,
+  }
+
   return (
     <div>
-      <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-        <button type="button" onClick={() => setMode('new')} style={{ height: 34, padding: '0 12px', border: `1.5px solid ${mode === 'new' ? 'var(--color-primary)' : 'var(--color-border)'}`, background: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', color: mode === 'new' ? 'var(--color-primary)' : 'var(--color-text-muted)' }}>
-          New Member
-        </button>
-        <button type="button" onClick={() => setMode('existing')} style={{ height: 34, padding: '0 12px', border: `1.5px solid ${mode === 'existing' ? 'var(--color-primary)' : 'var(--color-border)'}`, background: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', color: mode === 'existing' ? 'var(--color-primary)' : 'var(--color-text-muted)' }}>
-          Existing Member
-        </button>
-      </div>
+      <div
+        style={{
+          border: '1px solid var(--gg-border-subtle)',
+          borderRadius: 'var(--radius-lg)',
+          background: 'rgba(255,255,255,0.02)',
+          padding: isMobile ? '16px' : '20px',
+        }}
+      >
+        <div style={{ display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap' }}>
+          <button type="button" onClick={() => setMode('new')} style={tabButtonStyle(mode === 'new')}>
+            New Member
+          </button>
+          <button type="button" onClick={() => setMode('existing')} style={tabButtonStyle(mode === 'existing')}>
+            Existing Member
+          </button>
+        </div>
 
-      {mode === 'new' && (
-        <PersonForm onClose={onClose} />
-      )}
+        {mode === 'new' && (
+          <PersonForm onClose={onClose} />
+        )}
 
-      {mode === 'existing' && (
-        <div>
-          <label style={{ display: 'block', marginBottom: 6, fontSize: 'var(--text-sm)', fontWeight: 500 }}>Member Phone</label>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <input className="input" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="080XXXXXXXX" />
-            <button type="button" onClick={() => lookupMutation.mutate()} style={{ height: 40, padding: '0 14px', borderRadius: 'var(--radius-md)', border: 'none', background: 'var(--color-primary)', color: '#fff', cursor: 'pointer' }}>
-              Find
-            </button>
-          </div>
-          {foundMember && (
-            <div style={{ marginTop: 12, border: '1px solid var(--color-success)', background: 'var(--color-success-bg)', borderRadius: 'var(--radius-md)', padding: 12 }}>
-              <div style={{ fontWeight: 600 }}>{foundMember.first_name} {foundMember.last_name}</div>
-              <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', marginBottom: 10 }}>{foundMember.phone}</div>
-              <button type="button" onClick={() => { onClose(); navigate(`/members/${foundMember.id}`) }} style={{ height: 34, padding: '0 12px', borderRadius: 'var(--radius-md)', border: 'none', background: 'var(--color-success)', color: '#fff', cursor: 'pointer' }}>
-                Open Member Board
+        {mode === 'existing' && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              lookupMutation.mutate()
+            }}
+          >
+            <div style={{ marginBottom: 16 }}>
+              <label style={labelStyle}>Member Phone</label>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr auto', gap: 10 }}>
+                <input
+                  className="input"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="080XXXXXXXX"
+                />
+                <button
+                  type="submit"
+                  disabled={!phone || lookupMutation.isPending}
+                  style={{
+                    height: 40,
+                    padding: '0 18px',
+                    borderRadius: 'var(--radius-md)',
+                    border: 'none',
+                    background: !phone || lookupMutation.isPending ? 'rgba(212,175,55,0.35)' : 'var(--color-primary)',
+                    color: '#fff',
+                    cursor: !phone || lookupMutation.isPending ? 'not-allowed' : 'pointer',
+                    fontWeight: 600,
+                    fontSize: 'var(--text-sm)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    minWidth: isMobile ? '100%' : 112,
+                  }}
+                >
+                  <Search size={14} />
+                  {lookupMutation.isPending ? 'Finding...' : 'Find Member'}
+                </button>
+              </div>
+              <p style={{ margin: '8px 0 0', color: 'var(--color-text-muted)', fontSize: 'var(--text-xs)' }}>
+                Enter the phone number used during registration to open an existing member profile.
+              </p>
+            </div>
+
+            {foundMember ? (
+              <div
+                style={{
+                  border: '1px solid var(--color-success)',
+                  background: 'var(--color-success-bg)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: isMobile ? 14 : 16,
+                }}
+              >
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))',
+                    gap: 14,
+                    marginBottom: 16,
+                  }}
+                >
+                  <div>
+                    <span style={labelStyle}>Full Name</span>
+                    <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                      {foundMember.first_name} {foundMember.last_name}
+                    </div>
+                  </div>
+                  <div>
+                    <span style={labelStyle}>Phone Number</span>
+                    <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-primary)' }}>
+                      {foundMember.phone}
+                    </div>
+                  </div>
+                  <div>
+                    <span style={labelStyle}>Status</span>
+                    <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-primary)' }}>
+                      {foundMember.status.replace('_', ' ')}
+                    </div>
+                  </div>
+                  <div>
+                    <span style={labelStyle}>Source</span>
+                    <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-primary)' }}>
+                      {foundMember.source.replace('_', ' ')}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => setFoundMember(null)}
+                    style={{
+                      height: 36,
+                      padding: '0 14px',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--color-border)',
+                      background: 'none',
+                      cursor: 'pointer',
+                      color: 'var(--color-text-body)',
+                      fontSize: 'var(--text-sm)',
+                    }}
+                  >
+                    Clear Result
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { onClose(); navigate(`/members/${foundMember.id}`) }}
+                    style={{
+                      height: 36,
+                      padding: '0 16px',
+                      borderRadius: 'var(--radius-md)',
+                      border: 'none',
+                      background: 'var(--color-success)',
+                      color: '#fff',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                      fontSize: 'var(--text-sm)',
+                    }}
+                  >
+                    Open Member Board
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{
+                  border: '1px dashed var(--gg-border-default)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: isMobile ? '14px' : '16px',
+                  color: 'var(--color-text-muted)',
+                  fontSize: 'var(--text-sm)',
+                }}
+              >
+                Search for an existing record, then continue to the member board from here.
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', paddingTop: 16 }}>
+              <button
+                type="button"
+                onClick={onClose}
+                style={{
+                  height: 40,
+                  padding: '0 20px',
+                  border: '1px solid var(--gg-border-default)',
+                  borderRadius: 'var(--radius-md)',
+                  background: 'none',
+                  cursor: 'pointer',
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: 'var(--text-sm)',
+                  color: 'var(--gg-text-secondary)',
+                }}
+              >
+                Cancel
               </button>
             </div>
-          )}
-        </div>
-      )}
+          </form>
+        )}
+      </div>
     </div>
   )
 }

@@ -176,13 +176,15 @@ class PersonService:
     @staticmethod
     def batch_phone_lookup(phones: list) -> dict:
         from core.utils.phone import normalize_phone
+        from .serializers import PersonListSerializer  # local import avoids circular dependency
+
         normalized = [normalize_phone(p) for p in phones]
         found_qs   = Person.objects.filter(phone__in=normalized, deleted_at__isnull=True)
         found_map  = {p.phone: p for p in found_qs}
 
         results_list = []
-        found = []
-        not_found = []
+        found        = []
+        not_found    = []
         for phone in normalized:
             if phone in found_map:
                 entry = {'phone': phone, 'person': PersonListSerializer(found_map[phone]).data}
@@ -192,7 +194,3 @@ class PersonService:
                 results_list.append({'phone': phone, 'person': None})
                 not_found.append({'phone': phone})
         return {'results': results_list, 'found': found, 'not_found': not_found}
-
-
-# Avoid circular import — import here
-from apps.persons.serializers import PersonListSerializer  # noqa: E402

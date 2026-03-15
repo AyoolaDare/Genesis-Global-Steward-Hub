@@ -11,21 +11,21 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.24.0",
-    "zustand": "^4.5.4",
+    "@headlessui/react": "^2.1.1",
+    "@hookform/resolvers": "^3.9.0",
     "@tanstack/react-query": "^5.51.1",
     "@tanstack/react-table": "^8.19.3",
-    "react-hook-form": "^7.52.1",
-    "zod": "^3.23.8",
-    "@hookform/resolvers": "^3.9.0",
     "axios": "^1.7.2",
-    "recharts": "^2.12.7",
+    "date-fns": "^3.6.0",
     "lucide-react": "^0.408.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.71.2",
     "react-hot-toast": "^2.4.1",
-    "@headlessui/react": "^2.1.1",
-    "date-fns": "^3.6.0"
+    "react-router-dom": "^6.24.0",
+    "recharts": "^2.12.7",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.7"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
@@ -34,12 +34,13 @@
     "@typescript-eslint/parser": "^7.15.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.19",
+    "caniuse-lite": "^1.0.30001779",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.7",
     "postcss": "^8.4.39",
     "tailwindcss": "^3.4.6",
-    "typescript": "^5.5.3",
+    "typescript": "^5.9.3",
     "vite": "^5.3.4"
   }
 }

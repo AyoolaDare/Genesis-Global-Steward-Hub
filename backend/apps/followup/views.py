@@ -44,6 +44,19 @@ class FollowUpTaskViewSet(viewsets.ModelViewSet):
             assignee = SystemUser.objects.get(pk=serializer.validated_data['assigned_to'])
         except SystemUser.DoesNotExist:
             return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+        # A01: Only active Follow-Up staff or Admins may be assigned tasks.
+        # Assigning to an arbitrary user (e.g. Medical, HR) would give them
+        # visibility into the Follow-Up queue without the correct role.
+        if assignee.role not in ('FOLLOWUP', 'ADMIN'):
+            return Response(
+                {'error': 'Tasks can only be assigned to Follow-Up staff or Admins.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not assignee.is_active:
+            return Response(
+                {'error': 'Cannot assign tasks to an inactive user.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         task = FollowUpService.assign_task(task, assignee, request.user)
         return Response(FollowUpTaskSerializer(task).data)
 

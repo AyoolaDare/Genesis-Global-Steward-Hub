@@ -1,4 +1,7 @@
+import logging
 import re
+
+logger = logging.getLogger(__name__)
 
 
 class AuditMiddleware:
@@ -42,9 +45,12 @@ class AuditMiddleware:
                     ip_address=self._get_ip(request),
                     user_agent=request.META.get('HTTP_USER_AGENT', ''),
                 )
-            except Exception:
-                # Don't let audit logging failures break the request
-                pass
+            except Exception:  # noqa: BLE001
+                logger.exception(
+                    "AuditMiddleware failed to write log for %s %s",
+                    request.method,
+                    request.path,
+                )
 
         return response
 

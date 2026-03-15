@@ -27,7 +27,7 @@ class LoginSerializer(serializers.Serializer):
 
 
 class SystemUserCreateSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8)
+    password = serializers.CharField(write_only=True, min_length=12)
 
     class Meta:
         model  = SystemUser
@@ -43,7 +43,7 @@ class SystemUserCreateSerializer(serializers.ModelSerializer):
 
 
 class SystemUserUpdateSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8, required=False)
+    password = serializers.CharField(write_only=True, min_length=12, required=False)
 
     class Meta:
         model = SystemUser
@@ -62,4 +62,4 @@ class SystemUserUpdateSerializer(serializers.ModelSerializer):
 
 class ResetPasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(write_only=True)
-    new_password = serializers.CharField(write_only=True, min_length=8)
+    new_password = serializers.CharField(write_only=True, min_length=12)

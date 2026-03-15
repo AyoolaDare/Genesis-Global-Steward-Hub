@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 
 interface Props {
@@ -6,10 +7,11 @@ interface Props {
   onClose:  () => void
   title:    string
   width?:   number
+  footer?:  React.ReactNode
   children: React.ReactNode
 }
 
-export default function Modal({ open, onClose, title, width = 520, children }: Props) {
+export default function Modal({ open, onClose, title, width = 580, footer, children }: Props) {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     if (open) document.addEventListener('keydown', handler)
@@ -23,71 +25,114 @@ export default function Modal({ open, onClose, title, width = 520, children }: P
 
   if (!open) return null
 
-  return (
+  return createPortal(
     <>
+      {/* Backdrop */}
       <div
         onClick={onClose}
         style={{
           position: 'fixed', inset: 0,
-          background: 'rgba(15, 23, 51, 0.45)',
+          background: 'rgba(0,0,0,0.72)',
+          backdropFilter: 'blur(6px)',
+          WebkitBackdropFilter: 'blur(6px)',
           zIndex: 40,
-          backdropFilter: 'blur(2px)',
+          animation: 'gg-fade-in 180ms ease-out both',
         }}
       />
+
+      {/* Centering layer */}
       <div
         style={{
           position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width,
-          maxWidth: 'calc(100vw - 32px)',
-          maxHeight: 'calc(100vh - 64px)',
-          background: 'var(--color-surface)',
-          borderRadius: 'var(--radius-xl)',
-          border: '1px solid var(--color-border)',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.18)',
+          inset: 0,
           zIndex: 50,
-          display: 'flex',
-          flexDirection: 'column',
+          display: 'grid',
+          placeItems: 'center',
+          padding: '32px 16px',
+          pointerEvents: 'none',
         }}
       >
         <div
           style={{
-            padding: 'var(--space-5) var(--space-6)',
-            borderBottom: '1px solid var(--color-border)',
+            width: typeof width === 'number' ? `min(100%, ${width}px)` : width,
+            maxWidth: '100%',
+            maxHeight: 'calc(100dvh - 64px)',
+            background: 'var(--gg-surface)',
+            borderRadius: 'var(--radius-xl)',
+            border: '1px solid var(--gg-border-default)',
+            boxShadow: '0 24px 72px rgba(0,0,0,0.65), 0 0 0 1px rgba(212,175,55,0.06)',
+            display: 'flex',
+            flexDirection: 'column',
+            animation: 'gg-scale-in 280ms cubic-bezier(0.25, 0.8, 0.25, 1) both',
+            pointerEvents: 'auto',
+          }}
+        >
+          {/* Header */}
+          <div style={{
+            padding: '20px 24px',
+            borderBottom: '1px solid var(--gg-border-subtle)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             flexShrink: 0,
-          }}
-        >
-          <h2
-            style={{
-              fontFamily: 'var(--font-display)',
+          }}>
+            <h2 style={{
+              fontFamily: "'Cinzel', serif",
               fontSize: 'var(--text-lg)',
               fontWeight: 600,
-              color: 'var(--color-text-primary)',
+              letterSpacing: '0.04em',
+              color: 'var(--gg-text-primary)',
               margin: 0,
-            }}
-          >
-            {title}
-          </h2>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--color-text-muted)', display: 'flex', padding: 4,
-              borderRadius: 'var(--radius-sm)',
-            }}
-          >
-            <X size={20} />
-          </button>
-        </div>
-        <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--space-6)' }}>
-          {children}
+            }}>
+              {title}
+            </h2>
+            <button
+              onClick={onClose}
+              style={{
+                background: 'none',
+                border: '1px solid transparent',
+                borderRadius: 'var(--radius-sm)',
+                cursor: 'pointer',
+                color: 'var(--gg-text-secondary)',
+                display: 'flex',
+                padding: 6,
+                transition: 'color 150ms, border-color 150ms',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--gg-text-primary)'
+                e.currentTarget.style.borderColor = 'var(--gg-border-subtle)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--gg-text-secondary)'
+                e.currentTarget.style.borderColor = 'transparent'
+              }}
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Body */}
+          <div className="modal-body" style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+            {children}
+          </div>
+
+          {/* Optional sticky footer */}
+          {footer && (
+            <div style={{
+              padding: '16px 24px',
+              borderTop: '1px solid var(--gg-border-subtle)',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: 8,
+              flexShrink: 0,
+              background: 'var(--gg-surface)',
+            }}>
+              {footer}
+            </div>
+          )}
         </div>
       </div>
-    </>
+    </>,
+    document.body,
   )
 }

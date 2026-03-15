@@ -80,58 +80,62 @@ export default function PersonForm({ person, onClose }: Props) {
   })
 
   const inputStyle = (hasError?: boolean) => ({
-    height: 40,
-    padding: '0 12px',
-    border: `1.5px solid ${hasError ? 'var(--color-danger)' : 'var(--color-border)'}`,
-    borderRadius: 'var(--radius-md)',
-    font: `400 var(--text-base) var(--font-body)`,
-    color: 'var(--color-text-body)',
-    background: 'var(--color-surface)',
-    width: '100%',
-    boxSizing: 'border-box' as const,
+    ...(hasError ? {
+      borderColor: 'var(--gg-danger)',
+      boxShadow: '0 0 0 3px rgba(192,57,43,0.12)',
+    } : {}),
   })
 
   const labelStyle = {
     display: 'block',
-    fontSize: 'var(--text-sm)',
-    fontWeight: 500,
-    color: 'var(--color-text-primary)',
-    marginBottom: 'var(--space-2)',
+    fontFamily: "'DM Sans', sans-serif",
+    fontSize: 11,
+    fontWeight: 500 as const,
+    color: 'var(--gg-text-secondary)',
+    letterSpacing: '0.07em',
+    textTransform: 'uppercase' as const,
+    marginBottom: 6,
   }
 
   const errStyle = {
-    color: 'var(--color-danger)',
-    fontSize: 'var(--text-xs)',
-    marginTop: 'var(--space-1)',
+    color: 'var(--gg-danger)',
+    fontFamily: "'DM Sans', sans-serif",
+    fontSize: 11,
+    marginTop: 4,
   }
 
   const field = (name: keyof FormData, label: string, type = 'text') => (
-    <div style={{ marginBottom: 'var(--space-4)' }}>
+    <div style={{ marginBottom: 16 }}>
       <label style={labelStyle}>{label}</label>
       <input type={type} className="input" style={inputStyle(!!errors[name])} {...register(name)} />
       {errors[name] && <p style={errStyle}>{errors[name]!.message as string}</p>}
     </div>
   )
 
+  const cols = isMobile ? '1fr' : '1fr 1fr'
+  const gap  = 16
+
   return (
     <form onSubmit={handleSubmit((data) => mutation.mutate(data as CreatePersonPayload))}>
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 'var(--space-4)' }}>
-        <div>{field('first_name', 'First Name')}</div>
-        <div>{field('last_name', 'Last Name')}</div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: cols, gap }}>
+        {field('first_name', 'First Name')}
+        {field('last_name', 'Last Name')}
       </div>
+
       {field('other_names', 'Other Names')}
 
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 'var(--space-4)' }}>
-        <div>{field('phone', 'Phone Number', 'tel')}</div>
-        <div>{field('email', 'Email', 'email')}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: cols, gap }}>
+        {field('phone', 'Phone Number', 'tel')}
+        {field('email', 'Email', 'email')}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 'var(--space-4)' }}>
-        <div style={{ marginBottom: 'var(--space-4)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: cols, gap }}>
+        <div style={{ marginBottom: 16 }}>
           <label style={labelStyle}>Date of Birth</label>
           <input type="date" className="input" style={inputStyle(!!errors.date_of_birth)} {...register('date_of_birth')} />
         </div>
-        <div style={{ marginBottom: 'var(--space-4)' }}>
+        <div style={{ marginBottom: 16 }}>
           <label style={labelStyle}>Gender</label>
           <select className="input" style={inputStyle(!!errors.gender)} {...register('gender')}>
             <option value="MALE">Male</option>
@@ -142,17 +146,18 @@ export default function PersonForm({ person, onClose }: Props) {
       </div>
 
       {field('address', 'Address')}
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 'var(--space-4)' }}>
-        <div>{field('landmark', 'Landmark')}</div>
-        <div>{field('state', 'State')}</div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: cols, gap }}>
+        {field('landmark', 'Landmark')}
+        {field('state', 'State')}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 'var(--space-4)' }}>
-        <div>{field('occupation', 'Occupation')}</div>
-        <div style={{ marginBottom: 'var(--space-4)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: cols, gap }}>
+        {field('occupation', 'Occupation')}
+        <div style={{ marginBottom: 16 }}>
           <label style={labelStyle}>Marital Status</label>
           <select className="input" style={inputStyle(!!errors.marital_status)} {...register('marital_status')}>
-            <option value="">Select...</option>
+            <option value="">Select…</option>
             <option value="SINGLE">Single</option>
             <option value="MARRIED">Married</option>
             <option value="DIVORCED">Divorced</option>
@@ -161,7 +166,7 @@ export default function PersonForm({ person, onClose }: Props) {
         </div>
       </div>
 
-      <div style={{ marginBottom: 'var(--space-6)' }}>
+      <div style={{ marginBottom: 24 }}>
         <label style={labelStyle}>Source of Collection</label>
         <select className="input" style={inputStyle(!!errors.source)} {...register('source')}>
           <option value="WALK_IN">Walk-In</option>
@@ -173,12 +178,51 @@ export default function PersonForm({ person, onClose }: Props) {
         </select>
       </div>
 
-      <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'flex-end' }}>
-        <button type="button" onClick={onClose} style={{ height: 40, padding: '0 20px', border: '1.5px solid var(--color-border)', borderRadius: 'var(--radius-md)', background: 'none', cursor: 'pointer' }}>
+      {/* Action buttons */}
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', paddingTop: 8 }}>
+        <button
+          type="button"
+          onClick={onClose}
+          style={{
+            height: 40, padding: '0 20px',
+            border: '1px solid var(--gg-border-default)',
+            borderRadius: 'var(--radius-md)',
+            background: 'none',
+            cursor: 'pointer',
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 'var(--text-sm)',
+            color: 'var(--gg-text-secondary)',
+            transition: 'border-color 150ms, color 150ms',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--gg-text-primary)'; e.currentTarget.style.borderColor = 'var(--gg-border-strong)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--gg-text-secondary)'; e.currentTarget.style.borderColor = 'var(--gg-border-default)' }}
+        >
           Cancel
         </button>
-        <button type="submit" disabled={isSubmitting || mutation.isPending} style={{ height: 40, padding: '0 24px', background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer', fontWeight: 600 }}>
-          {isSubmitting || mutation.isPending ? 'Saving...' : isEdit ? 'Save Changes' : 'Add Member'}
+        <button
+          type="submit"
+          disabled={isSubmitting || mutation.isPending}
+          style={{
+            height: 40, padding: '0 24px',
+            background: isSubmitting || mutation.isPending
+              ? 'rgba(232,99,26,0.45)'
+              : 'linear-gradient(135deg, #E8631A 0%, #D4AF37 100%)',
+            color: '#0A0A0A',
+            border: 'none',
+            borderRadius: 'var(--radius-md)',
+            cursor: isSubmitting || mutation.isPending ? 'not-allowed' : 'pointer',
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: '0.07em',
+            textTransform: 'uppercase' as const,
+            boxShadow: '0 4px 16px rgba(232,99,26,0.20)',
+            transition: 'filter 150ms',
+          }}
+          onMouseEnter={(e) => { if (!isSubmitting && !mutation.isPending) e.currentTarget.style.filter = 'brightness(1.08)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.filter = '' }}
+        >
+          {isSubmitting || mutation.isPending ? 'Saving…' : isEdit ? 'Save Changes' : 'Add Member'}
         </button>
       </div>
     </form>
