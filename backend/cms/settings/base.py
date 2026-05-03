@@ -67,6 +67,7 @@ LOCAL_APPS = [
     'apps.notifications',
     'apps.messaging',
     'apps.audit',
+    'apps.sponsors',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -150,15 +151,16 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon':         '100/hour',
-        'user':         '1000/hour',
-        'login':        '10/hour',
-        'phone_lookup': '30/hour',
-        'search':       '120/hour',
+        'anon':          '100/hour',
+        'user':          '1000/hour',
+        'login':         '10/hour',
+        'token_refresh': '20/hour',
+        'phone_lookup':  '30/hour',
+        'search':        '120/hour',
     },
 }
 
-# SimpleJWT
+# SimpleJWT — SIGNING_KEY overridden in production.py with a dedicated secret
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME':    timedelta(minutes=15),
     'REFRESH_TOKEN_LIFETIME':   timedelta(days=7),
@@ -167,14 +169,19 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES':        ('Bearer',),
     'USER_ID_FIELD':            'id',
     'USER_ID_CLAIM':            'user_id',
+    'ALGORITHM':                'HS256',
+    # Falls back to SECRET_KEY in dev; production.py sets an independent JWT_SIGNING_KEY
+    'SIGNING_KEY':              config('JWT_SIGNING_KEY', default=None) or config('SECRET_KEY', default='django-insecure-dev-key-REPLACE-IN-PRODUCTION'),
 }
 
-# drf-spectacular (Swagger/OpenAPI)
+# drf-spectacular (Swagger/OpenAPI) — locked to admin-only in all environments
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Genesis Global Steward Hub API',
     'DESCRIPTION': 'Internal operations API for church management.',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'SERVE_PERMISSIONS':    ['rest_framework.permissions.IsAdminUser'],
+    'SERVE_AUTHENTICATION': ['rest_framework.authentication.SessionAuthentication'],
 }
 
 # CORS — credentials only enabled explicitly in production.py
@@ -191,6 +198,13 @@ CSRF_COOKIE_HTTPONLY = True
 # Email paused globally for now (no outbound delivery)
 EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 DEFAULT_FROM_EMAIL = config('EMAIL_FROM', default='noreply@yourchurch.org')
+
+# Cron key — used by GitHub Actions scheduled workflows to trigger bulk SMS endpoints
+# Set CRON_SECRET in Azure App Service settings (or .env for local testing)
+CRON_SECRET = config('CRON_SECRET', default='')
+
+# Paystack — set PAYSTACK_SECRET_KEY in Azure App Service settings
+PAYSTACK_SECRET_KEY = config('PAYSTACK_SECRET_KEY', default='')
 
 # Termii SMS — set TERMII_API_KEY, TERMII_SENDER_ID, and TERMII_BASE_URL in .env / Render dashboard
 TERMII_API_KEY = config('TERMII_API_KEY', default='')

@@ -1,0 +1,23 @@
+name: Cron — Monthly Greeting SMS
+
+on:
+  schedule:
+    - cron: '0 8 1 * *'   # 1st of every month 08:00 UTC = 09:00 WAT (Nigeria)
+  workflow_dispatch:        # Allow manual trigger from GitHub UI
+
+jobs:
+  send-greetings:
+    name: Broadcast monthly greeting to all active sponsors
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger bulk_greetings endpoint
+        run: |
+          BACKEND="https://${{ secrets.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+          RESPONSE=$(curl -s -o response.json -w "%{http_code}" \
+            -X POST "${BACKEND}/api/v1/sponsors/sponsors/bulk_greetings/" \
+            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json")
+          echo "HTTP $RESPONSE"
+          cat response.json
+          [ "$RESPONSE" = "200" ] || exit 1

@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Eye, EyeOff } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { isAxiosError } from 'axios'
 import { authApi } from '@/api/auth'
 import { useAuthStore } from '@/store/authStore'
 
@@ -31,12 +32,12 @@ export default function LoginPage() {
         return
       }
       navigate('/dashboard', { replace: true })
-    } catch (err: any) {
-      if (!err.response) {
+    } catch (err: unknown) {
+      if (!isAxiosError(err) || !err.response) {
         toast.error('Cannot reach server. Confirm backend is running.')
         return
       }
-      toast.error(err.response?.data?.error?.message ?? 'Invalid credentials')
+      toast.error(err.response.data?.error?.message ?? 'Invalid credentials')
     }
   }
 
@@ -47,28 +48,28 @@ export default function LoginPage() {
       alignItems: 'center',
       justifyContent: 'center',
       background: `
-        radial-gradient(ellipse 60% 50% at 15% 60%,  rgba(212,175,55,0.08) 0%, transparent 100%),
-        radial-gradient(ellipse 50% 40% at 85% 15%,  rgba(26,111,212,0.07) 0%, transparent 100%),
-        radial-gradient(ellipse 40% 35% at 50% 95%,  rgba(232,99,26,0.05)  0%, transparent 100%),
-        #080808
+        radial-gradient(ellipse 70% 60% at 10% 70%,  rgba(244,216,9,0.08) 0%, transparent 100%),
+        radial-gradient(ellipse 55% 45% at 90% 10%,  rgba(80,70,9,0.55) 0%,  transparent 100%),
+        radial-gradient(ellipse 40% 35% at 55% 100%, rgba(108,94,0,0.10) 0%, transparent 100%),
+        #2a2504
       `,
       padding: '24px 16px',
       position: 'relative',
       overflow: 'hidden',
     }}>
 
-      {/* Decorative ambient orbs */}
+      {/* Ambient glow orbs */}
       <div style={{
-        position: 'absolute', top: '10%', right: '8%',
-        width: 320, height: 320, borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(212,175,55,0.10) 0%, transparent 70%)',
+        position: 'absolute', top: '8%', right: '6%',
+        width: 280, height: 280, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(244,216,9,0.09) 0%, transparent 70%)',
         pointerEvents: 'none',
         animation: 'gg-float 7s ease-in-out infinite',
       }} />
       <div style={{
-        position: 'absolute', bottom: '8%', left: '4%',
-        width: 200, height: 200, borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(26,111,212,0.10) 0%, transparent 70%)',
+        position: 'absolute', bottom: '10%', left: '3%',
+        width: 160, height: 160, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(108,94,0,0.12) 0%, transparent 70%)',
         pointerEvents: 'none',
         animation: 'gg-float 9s ease-in-out infinite reverse',
       }} />
@@ -76,66 +77,66 @@ export default function LoginPage() {
       <div style={{ width: '100%', maxWidth: 420, position: 'relative', zIndex: 1 }}>
 
         {/* Brand header */}
-        <div style={{ textAlign: 'center', marginBottom: 36 }}>
+        <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <img
             src="/app-logo.png"
             alt="Genesis Global"
             style={{
               width: 68, height: 68,
-              borderRadius: 18,
+              borderRadius: 16,
               margin: '0 auto 20px',
               objectFit: 'cover',
               display: 'block',
-              border: '1px solid rgba(212,175,55,0.35)',
-              boxShadow: '0 8px 32px rgba(212,175,55,0.15)',
+              border: '1.5px solid rgba(244,216,9,0.30)',
+              boxShadow: '0 6px 24px rgba(0,0,0,0.30)',
               animation: 'gg-pulse-gold 4s ease-in-out infinite',
             }}
           />
           <h1 className="shimmer-text" style={{
-            fontFamily: "'Cinzel', serif",
-            fontSize: 'clamp(1.3rem, 3vw, 1.75rem)',
+            fontFamily: "'Public Sans', sans-serif",
+            fontSize: 'clamp(1.4rem, 3vw, 1.8rem)',
             fontWeight: 700,
-            letterSpacing: '0.06em',
-            margin: '0 0 10px',
+            letterSpacing: '-0.01em',
+            margin: '0 0 8px',
             lineHeight: 1.2,
           }}>
             Genesis Global
           </h1>
           <p style={{
-            fontFamily: "'Cormorant Garamond', serif",
+            fontFamily: "'Public Sans', sans-serif",
             fontStyle: 'italic',
             fontWeight: 300,
-            fontSize: 'clamp(0.95rem, 1.5vw, 1.1rem)',
-            color: 'rgba(212,175,55,0.60)',
+            fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
+            color: 'rgba(244, 216, 9, 0.50)',
             margin: 0,
-            letterSpacing: '0.02em',
+            letterSpacing: '0.01em',
           }}>
             Steward Hub — Members Portal
           </p>
         </div>
 
-        {/* Glass login card */}
+        {/* Login card — DESIGN.md: 8px radius for containers */}
         <div style={{
-          background: 'rgba(255,255,255,0.025)',
-          border: '1px solid rgba(212,175,55,0.22)',
-          borderRadius: 24,
-          backdropFilter: 'blur(16px) saturate(1.2)',
-          WebkitBackdropFilter: 'blur(16px) saturate(1.2)',
+          background: 'rgba(80, 70, 9, 0.32)',
+          border: '1px solid rgba(244, 216, 9, 0.20)',
+          borderRadius: 8,
+          backdropFilter: 'blur(20px) saturate(1.2)',
+          WebkitBackdropFilter: 'blur(20px) saturate(1.2)',
           padding: 'clamp(24px, 5vw, 36px)',
-          boxShadow: '0 16px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(212,175,55,0.06)',
-          animation: 'gg-scale-in 400ms cubic-bezier(0.25, 0.8, 0.25, 1) both',
+          boxShadow: '0 16px 48px rgba(0,0,0,0.40), inset 0 1px 0 rgba(244,216,9,0.08)',
+          animation: 'gg-scale-in 380ms cubic-bezier(0.25, 0.8, 0.25, 1) both',
         }}>
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
 
             {/* Username / Email */}
             <div style={{ marginBottom: 20 }}>
-              <label htmlFor="identifier" style={LABEL_STYLE}>Username or Email</label>
+              <label htmlFor="identifier" style={LABEL_STYLE}>Username or email</label>
               <input
                 id="identifier"
                 type="text"
                 autoComplete="username"
-                className="input"
                 placeholder="username or admin@genesis.org"
+                className="input-dark"
                 style={errors.identifier ? INPUT_ERROR_STYLE : undefined}
                 {...register('identifier')}
               />
@@ -150,8 +151,8 @@ export default function LoginPage() {
                   id="password"
                   type={showPw ? 'text' : 'password'}
                   autoComplete="current-password"
-                  className="input"
                   placeholder="••••••••"
+                  className="input-dark"
                   style={{ paddingRight: 48, ...(errors.password ? INPUT_ERROR_STYLE : {}) }}
                   {...register('password')}
                 />
@@ -163,7 +164,7 @@ export default function LoginPage() {
                     position: 'absolute', right: 14, top: '50%',
                     transform: 'translateY(-50%)',
                     background: 'none', border: 'none', cursor: 'pointer',
-                    color: 'var(--gg-text-secondary)', display: 'flex', padding: 0,
+                    color: 'rgba(244, 216, 9, 0.45)', display: 'flex', padding: 0,
                   }}
                 >
                   {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -172,38 +173,38 @@ export default function LoginPage() {
               {errors.password && <p style={ERROR_TEXT_STYLE}>{errors.password.message}</p>}
             </div>
 
-            {/* Submit */}
+            {/* Submit — DESIGN.md: gold bg, dark text, uppercase, 4px radius */}
             <button
               type="submit"
               disabled={isSubmitting}
               style={{
                 width: '100%',
                 height: 48,
-                background: isSubmitting
-                  ? 'rgba(232,99,26,0.45)'
-                  : 'linear-gradient(135deg, #E8631A 0%, #D4AF37 100%)',
-                color: '#0A0A0A',
+                background: isSubmitting ? 'rgba(244, 216, 9, 0.45)' : '#f4d809',
+                color: '#211c00',
                 border: 'none',
-                borderRadius: 10,
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 11,
-                fontWeight: 600,
-                letterSpacing: '0.09em',
+                borderRadius: 4,
+                fontFamily: "'Public Sans', sans-serif",
+                fontSize: 13,
+                fontWeight: 700,
+                letterSpacing: '0.07em',
                 textTransform: 'uppercase',
                 cursor: isSubmitting ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: 8,
-                boxShadow: isSubmitting ? 'none' : '0 4px 24px rgba(232,99,26,0.22), 0 0 0 1px rgba(232,99,26,0.28)',
-                transition: 'filter 150ms ease-out',
+                boxShadow: isSubmitting ? 'none' : '0 2px 10px rgba(108,94,0,0.20)',
+                transition: 'filter 150ms ease-out, transform 150ms ease-out',
               }}
-              onMouseEnter={(e) => { if (!isSubmitting) e.currentTarget.style.filter = 'brightness(1.09)' }}
+              onMouseEnter={(e) => { if (!isSubmitting) e.currentTarget.style.filter = 'brightness(1.06)' }}
               onMouseLeave={(e) => { e.currentTarget.style.filter = '' }}
+              onMouseDown={(e)  => { if (!isSubmitting) e.currentTarget.style.transform = 'scale(0.98)' }}
+              onMouseUp={(e)    => { e.currentTarget.style.transform = '' }}
             >
               {isSubmitting
-                ? <><span className="spinner" style={{ width: 16, height: 16, borderTopColor: '#0A0A0A' }} />Signing in…</>
-                : 'Sign In'
+                ? <><span className="spinner" style={{ width: 16, height: 16, borderTopColor: '#211c00', borderColor: 'rgba(33,28,0,0.22)' }} />Signing in…</>
+                : 'Sign in'
               }
             </button>
 
@@ -212,10 +213,10 @@ export default function LoginPage() {
 
         <p style={{
           textAlign: 'center',
-          fontFamily: "'DM Sans', sans-serif",
+          fontFamily: "'Public Sans', sans-serif",
           fontSize: 11,
-          color: 'var(--gg-text-secondary)',
-          letterSpacing: '0.06em',
+          color: 'rgba(244, 216, 9, 0.25)',
+          letterSpacing: '0.05em',
           textTransform: 'uppercase',
           marginTop: 28,
         }}>
@@ -226,23 +227,25 @@ export default function LoginPage() {
   )
 }
 
-const LABEL_STYLE = {
+const LABEL_STYLE: React.CSSProperties = {
   display: 'block',
-  fontFamily: "'DM Sans', sans-serif",
+  fontFamily: "'Public Sans', sans-serif",
   fontSize: 11,
-  fontWeight: 500,
-  color: 'var(--gg-text-secondary)',
-  letterSpacing: '0.09em',
+  fontWeight: 600,
+  color: 'rgba(244, 216, 9, 0.55)',
+  letterSpacing: '0.06em',
   textTransform: 'uppercase',
   marginBottom: 8,
 }
-const INPUT_ERROR_STYLE = {
-  borderColor: 'rgba(192,57,43,0.65)',
-  boxShadow: '0 0 0 3px rgba(192,57,43,0.12)',
+
+const INPUT_ERROR_STYLE: React.CSSProperties = {
+  borderColor: 'rgba(186,26,26,0.70)',
+  borderWidth: 2,
 }
-const ERROR_TEXT_STYLE = {
-  color: 'var(--gg-danger)',
-  fontFamily: "'DM Sans', sans-serif",
+
+const ERROR_TEXT_STYLE: React.CSSProperties = {
+  color: '#ffdad6',
+  fontFamily: "'Public Sans', sans-serif",
   fontSize: 11,
   marginTop: 5,
 }

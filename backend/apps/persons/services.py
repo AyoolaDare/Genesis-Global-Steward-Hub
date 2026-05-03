@@ -6,6 +6,7 @@ from .models import Person
 class PersonService:
 
     @staticmethod
+    @transaction.atomic
     def approve_profile(person: Person, approved_by) -> Person:
         if person.status != Person.Status.PENDING_APPROVAL:
             raise ValueError('Only PENDING_APPROVAL profiles can be approved.')

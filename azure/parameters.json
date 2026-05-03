@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "appName": {
+      "value": "cmschurch"
+    },
+    "location": {
+      "value": "uksouth"
+    },
+    "dbAdminUser": {
+      "value": "cms_admin"
+    },
+    "dbAdminPassword": {
+      "value": "_okAzVcxQ5amluYFVsK9vA:50663"
+    },
+    "djangoSecretKey": {
+      "value": "Npx-5KTOWXtMojTbejvGMbGa2ha2bpli8o5TTgldSAqw-5hV2BaQWZOLMf_DsQC6"
+    },
+    "jwtSigningKey": {
+      "value": "b6bbd20172986f1f103ee324ad53740c7ba00434944fa09a44ca1d9c96a14ffe595ee83ec7ce174834bd2ca5eed5b66354a5"
+    },
+    "frontendUrl": {
+      "value": "https://cmschurch-frontend.azurestaticapps.net"
+    },
+    "superuserEmail": {
+      "value": "admin@genesis.org"
+    },
+    "superuserPassword": {
+      "value": "bEWw8G0LqGM5p0my5eU4rwYtQpci5bgy"
+    },
+    "termiiApiKey": {
+      "value": ""
+    },
+    "termiiSenderId": {
+      "value": "Genesis"
+    },
+    "cronSecret": {
+      "value": "Npx-5KTOWXtMojTbejvGMbGa2ha2bpli8o5TTgldSAqw-5hV2BaQWZOLMf_DsQC6"
+    }
+  }
+}

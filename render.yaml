@@ -106,6 +106,84 @@ services:
       - key: SUPERUSER_PASSWORD
         sync: false
 
+  # ── Cron: weekly prayer SMS (every Sunday 08:00 WAT = 07:00 UTC) ───────────
+  - type: cron
+    name: cms-weekly-prayers
+    env: python
+    region: oregon
+    plan: starter
+    rootDir: backend
+    runtime: python
+    schedule: "0 7 * * 0"
+    buildCommand: pip install -r requirements/production.txt
+    startCommand: python manage.py send_weekly_prayers --settings=cms.settings.production
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: cms.settings.production
+      - key: DB_NAME
+        fromDatabase:
+          name: cms-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: cms-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: cms-db
+          property: password
+      - key: DB_HOST
+        fromDatabase:
+          name: cms-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: cms-db
+          property: port
+      - key: TERMII_API_KEY
+        sync: false
+      - key: TERMII_SENDER_ID
+        sync: false
+
+  # ── Cron: monthly greeting SMS (1st of month 09:00 WAT = 08:00 UTC) ─────
+  - type: cron
+    name: cms-monthly-greetings
+    env: python
+    region: oregon
+    plan: starter
+    rootDir: backend
+    runtime: python
+    schedule: "0 8 1 * *"
+    buildCommand: pip install -r requirements/production.txt
+    startCommand: python manage.py send_monthly_greetings --settings=cms.settings.production
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: cms.settings.production
+      - key: DB_NAME
+        fromDatabase:
+          name: cms-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: cms-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: cms-db
+          property: password
+      - key: DB_HOST
+        fromDatabase:
+          name: cms-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: cms-db
+          property: port
+      - key: TERMII_API_KEY
+        sync: false
+      - key: TERMII_SENDER_ID
+        sync: false
+
 databases:
   - name: cms-db
     databaseName: cms_church

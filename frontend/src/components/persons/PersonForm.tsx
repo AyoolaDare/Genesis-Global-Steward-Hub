@@ -88,7 +88,7 @@ export default function PersonForm({ person, onClose }: Props) {
 
   const labelStyle = {
     display: 'block',
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: "'Public Sans', sans-serif",
     fontSize: 11,
     fontWeight: 500 as const,
     color: 'var(--gg-text-secondary)',
@@ -99,7 +99,7 @@ export default function PersonForm({ person, onClose }: Props) {
 
   const errStyle = {
     color: 'var(--gg-danger)',
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: "'Public Sans', sans-serif",
     fontSize: 11,
     marginTop: 4,
   }
@@ -189,7 +189,7 @@ export default function PersonForm({ person, onClose }: Props) {
             borderRadius: 'var(--radius-md)',
             background: 'none',
             cursor: 'pointer',
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Public Sans', sans-serif",
             fontSize: 'var(--text-sm)',
             color: 'var(--gg-text-secondary)',
             transition: 'border-color 150ms, color 150ms',
@@ -211,7 +211,7 @@ export default function PersonForm({ person, onClose }: Props) {
             border: 'none',
             borderRadius: 'var(--radius-md)',
             cursor: isSubmitting || mutation.isPending ? 'not-allowed' : 'pointer',
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Public Sans', sans-serif",
             fontSize: 11,
             fontWeight: 600,
             letterSpacing: '0.07em',

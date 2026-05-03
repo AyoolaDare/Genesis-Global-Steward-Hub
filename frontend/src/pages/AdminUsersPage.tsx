@@ -123,7 +123,7 @@ function PersonSearch({ value, onChange }: PersonSearchProps) {
           background: 'rgba(212,175,55,0.15)',
           color: 'var(--gg-gold-200)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 10, fontWeight: 700, fontFamily: "'Cinzel', serif", flexShrink: 0,
+          fontSize: 10, fontWeight: 700, fontFamily: "'Public Sans', sans-serif", flexShrink: 0,
         }}>
           {value.name.slice(0, 2).toUpperCase()}
         </div>
@@ -194,7 +194,7 @@ function PersonSearch({ value, onChange }: PersonSearchProps) {
                   background: 'rgba(212,175,55,0.12)',
                   color: 'var(--gg-gold-200)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 11, fontWeight: 700, fontFamily: "'Cinzel', serif", flexShrink: 0,
+                  fontSize: 11, fontWeight: 700, fontFamily: "'Public Sans', sans-serif", flexShrink: 0,
                 }}>
                   {name.slice(0, 2).toUpperCase()}
                 </div>
@@ -369,7 +369,7 @@ function UserModal({ user, onClose }: UserModalProps) {
             <button
               type="button"
               onClick={() => setValue('module_access', ALL_MODULES.map(m => m.key))}
-              style={{ fontSize: 11, color: 'var(--gg-gold-200)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: "'DM Sans', sans-serif" }}
+              style={{ fontSize: 11, color: 'var(--gg-gold-200)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: "'Public Sans', sans-serif" }}
             >
               All
             </button>
@@ -377,7 +377,7 @@ function UserModal({ user, onClose }: UserModalProps) {
             <button
               type="button"
               onClick={() => setValue('module_access', [])}
-              style={{ fontSize: 11, color: 'var(--gg-text-secondary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: "'DM Sans', sans-serif" }}
+              style={{ fontSize: 11, color: 'var(--gg-text-secondary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: "'Public Sans', sans-serif" }}
             >
               None
             </button>
@@ -385,7 +385,7 @@ function UserModal({ user, onClose }: UserModalProps) {
             <button
               type="button"
               onClick={() => setValue('module_access', ROLE_DEFAULT_MODULES[watchedRole as AppRole] ?? [])}
-              style={{ fontSize: 11, color: 'var(--gg-text-secondary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: "'DM Sans', sans-serif" }}
+              style={{ fontSize: 11, color: 'var(--gg-text-secondary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: "'Public Sans', sans-serif" }}
             >
               Reset defaults
             </button>
@@ -406,7 +406,7 @@ function UserModal({ user, onClose }: UserModalProps) {
                   borderRadius: 'var(--radius-md)',
                   background: on ? 'rgba(212,175,55,0.08)' : 'transparent',
                   color: on ? 'var(--gg-gold-200)' : 'var(--gg-text-secondary)',
-                  fontFamily: "'DM Sans', sans-serif",
+                  fontFamily: "'Public Sans', sans-serif",
                   fontSize: 12, cursor: 'pointer',
                   transition: 'all 150ms',
                   textAlign: 'left',
@@ -449,7 +449,7 @@ function UserModal({ user, onClose }: UserModalProps) {
       {/* Active */}
       <label style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28, cursor: 'pointer' }}>
         <input type="checkbox" {...register('is_active')} />
-        <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 'var(--text-sm)', color: 'var(--gg-text-primary)' }}>
+        <span style={{ fontFamily: "'Public Sans', sans-serif", fontSize: 'var(--text-sm)', color: 'var(--gg-text-primary)' }}>
           Account active
         </span>
       </label>
@@ -467,7 +467,7 @@ function UserModal({ user, onClose }: UserModalProps) {
               : 'linear-gradient(135deg, #E8631A 0%, #D4AF37 100%)',
             color: '#0A0A0A', border: 'none',
             borderRadius: 'var(--radius-md)',
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Public Sans', sans-serif",
             fontSize: 11, fontWeight: 600,
             letterSpacing: '0.07em', textTransform: 'uppercase' as const,
             cursor: mutation.isPending ? 'not-allowed' : 'pointer',
@@ -536,7 +536,7 @@ export default function AdminUsersPage() {
             <Shield size={18} style={{ color: 'var(--gg-gold-200)' }} />
             <h1 style={{
               margin: 0,
-              fontFamily: "'Cinzel', serif",
+              fontFamily: "'Public Sans', sans-serif",
               fontSize: 20, fontWeight: 600, letterSpacing: '0.05em',
               color: 'var(--gg-text-primary)',
             }}>
@@ -545,7 +545,7 @@ export default function AdminUsersPage() {
           </div>
           <p style={{
             margin: 0,
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Public Sans', sans-serif",
             fontSize: 'var(--text-sm)', color: 'var(--gg-text-secondary)',
           }}>
             Manage system accounts, roles, and module permissions
@@ -559,7 +559,7 @@ export default function AdminUsersPage() {
             background: 'linear-gradient(135deg, #E8631A 0%, #D4AF37 100%)',
             color: '#0A0A0A', border: 'none',
             borderRadius: 'var(--radius-md)',
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Public Sans', sans-serif",
             fontSize: 11, fontWeight: 600, letterSpacing: '0.07em', textTransform: 'uppercase' as const,
             cursor: 'pointer',
             boxShadow: '0 4px 16px rgba(232,99,26,0.20)',
@@ -592,7 +592,7 @@ export default function AdminUsersPage() {
                 border: `1px solid ${active ? (cfg?.color ?? 'var(--gg-gold-200)') : 'var(--gg-border-subtle)'}`,
                 background: active ? (cfg?.bg ?? 'rgba(212,175,55,0.10)') : 'transparent',
                 color: active ? (cfg?.color ?? 'var(--gg-gold-200)') : 'var(--gg-text-secondary)',
-                fontFamily: "'DM Sans', sans-serif",
+                fontFamily: "'Public Sans', sans-serif",
                 fontSize: 12, cursor: 'pointer',
                 transition: 'all 150ms',
               }}
@@ -689,7 +689,7 @@ export default function AdminUsersPage() {
                               border: `1px solid ${cfg.color}33`,
                               color: cfg.color,
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              fontSize: 11, fontWeight: 700, fontFamily: "'Cinzel', serif",
+                              fontSize: 11, fontWeight: 700, fontFamily: "'Public Sans', sans-serif",
                             }}>
                               {initials}
                             </div>
@@ -721,7 +721,7 @@ export default function AdminUsersPage() {
                             background: cfg.bg, color: cfg.color,
                             border: `1px solid ${cfg.color}33`,
                             fontSize: 11, fontWeight: 500,
-                            fontFamily: "'DM Sans', sans-serif",
+                            fontFamily: "'Public Sans', sans-serif",
                             whiteSpace: 'nowrap',
                           }}>
                             {cfg.label}
@@ -754,7 +754,7 @@ export default function AdminUsersPage() {
                                   border: '1px solid rgba(212,175,55,0.18)',
                                   color: 'var(--gg-gold-200)',
                                   fontSize: 10,
-                                  fontFamily: "'DM Sans', sans-serif",
+                                  fontFamily: "'Public Sans', sans-serif",
                                 }}>
                                   {mod.label}
                                 </span>
@@ -768,7 +768,7 @@ export default function AdminUsersPage() {
                                 border: '1px solid var(--gg-border-subtle)',
                                 color: 'var(--gg-text-secondary)',
                                 fontSize: 10,
-                                fontFamily: "'DM Sans', sans-serif",
+                                fontFamily: "'Public Sans', sans-serif",
                               }}>
                                 +{extraCount}
                               </span>
@@ -787,7 +787,7 @@ export default function AdminUsersPage() {
                               background: u.is_active ? 'rgba(39,174,96,0.10)' : 'rgba(192,57,43,0.10)',
                               color: u.is_active ? 'var(--gg-success)' : 'var(--gg-danger)',
                               fontSize: 11, fontWeight: 500, cursor: 'pointer',
-                              fontFamily: "'DM Sans', sans-serif",
+                              fontFamily: "'Public Sans', sans-serif",
                               transition: 'all 150ms',
                             }}
                             onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.75' }}
@@ -816,7 +816,7 @@ export default function AdminUsersPage() {
                               borderRadius: 'var(--radius-sm)',
                               color: 'var(--gg-text-secondary)',
                               fontSize: 11, cursor: 'pointer',
-                              fontFamily: "'DM Sans', sans-serif",
+                              fontFamily: "'Public Sans', sans-serif",
                               transition: 'all 150ms',
                             }}
                             onMouseEnter={(e) => {
@@ -840,7 +840,7 @@ export default function AdminUsersPage() {
                       textAlign: 'center',
                       padding: '56px 16px',
                       color: 'var(--gg-text-secondary)',
-                      fontFamily: "'DM Sans', sans-serif",
+                      fontFamily: "'Public Sans', sans-serif",
                       fontSize: 'var(--text-sm)',
                     }}>
                       No accounts found.
@@ -901,7 +901,7 @@ export default function AdminUsersPage() {
 
 const LBL: CSSProperties = {
   display: 'block',
-  fontFamily: "'DM Sans', sans-serif",
+  fontFamily: "'Public Sans', sans-serif",
   fontSize: 11,
   fontWeight: 500,
   color: 'var(--gg-text-secondary)',
@@ -912,7 +912,7 @@ const LBL: CSSProperties = {
 
 const ERR: CSSProperties = {
   color: 'var(--gg-danger)',
-  fontFamily: "'DM Sans', sans-serif",
+  fontFamily: "'Public Sans', sans-serif",
   fontSize: 11,
   marginTop: 4,
 }
@@ -930,7 +930,7 @@ const GHOST_BTN: CSSProperties = {
   background: 'none',
   cursor: 'pointer',
   color: 'var(--gg-text-secondary)',
-  fontFamily: "'DM Sans', sans-serif",
+  fontFamily: "'Public Sans', sans-serif",
   fontSize: 'var(--text-sm)',
 }
 
@@ -942,7 +942,7 @@ const TH: CSSProperties = {
   textTransform: 'uppercase',
   letterSpacing: '0.08em',
   color: 'var(--gg-text-disabled)',
-  fontFamily: "'DM Sans', sans-serif",
+  fontFamily: "'Public Sans', sans-serif",
   whiteSpace: 'nowrap',
 }
 

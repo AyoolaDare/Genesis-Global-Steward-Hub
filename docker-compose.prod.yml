@@ -1,0 +1,65 @@
+version: '3.8'
+
+# Production-like setup for local testing
+# Similar to how it runs on Render/production, but local database
+# Usage: docker-compose -f docker-compose.prod.yml up --build
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: cms_church_prod
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile  # Production Dockerfile
+    restart: always
+    environment:
+      DJANGO_SETTINGS_MODULE: cms.settings.production
+      SECRET_KEY: ${SECRET_KEY}
+      DEBUG: "False"
+      DB_NAME: cms_church_prod
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: db
+      DB_PORT: "5432"
+      ALLOWED_HOSTS: "localhost,127.0.0.1,backend"
+      CORS_ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:5173"
+      PORT: "8000"
+      # Optional: Email, Cloudinary, etc.
+      EMAIL_BACKEND: django.core.mail.backends.console.EmailBackend
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend/staticfiles:/app/staticfiles  # Mount for static files inspection
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev  # Use dev for HMR; replace with prod build for true prod
+    restart: always
+    environment:
+      VITE_API_URL: http://localhost:8000/api/v1
+    ports:
+      - "127.0.0.1:5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_prod_data:

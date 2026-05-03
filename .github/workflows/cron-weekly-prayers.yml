@@ -1,0 +1,23 @@
+name: Cron — Weekly Prayer SMS
+
+on:
+  schedule:
+    - cron: '0 7 * * 0'   # Every Sunday 07:00 UTC = 08:00 WAT (Nigeria)
+  workflow_dispatch:        # Allow manual trigger from GitHub UI
+
+jobs:
+  send-prayers:
+    name: Broadcast weekly prayer to all active sponsors
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger bulk_prayers endpoint
+        run: |
+          BACKEND="https://${{ secrets.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+          RESPONSE=$(curl -s -o response.json -w "%{http_code}" \
+            -X POST "${BACKEND}/api/v1/sponsors/sponsors/bulk_prayers/" \
+            -H "X-Cron-Secret: ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json")
+          echo "HTTP $RESPONSE"
+          cat response.json
+          [ "$RESPONSE" = "200" ] || exit 1

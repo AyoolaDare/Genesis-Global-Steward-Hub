@@ -5,9 +5,6 @@ import path from 'path'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
 
-  // In dev mode, proxy /api to the backend so the browser never hits CORS.
-  // The proxy target is read from VITE_API_PROXY_TARGET (defaults to Docker
-  // service name for docker-compose usage).
   const devProxy = mode === 'development'
     ? {
         '/api': {
@@ -39,7 +36,6 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: 5173,
-      // 0.0.0.0 needed so Vite is reachable inside Docker; fine for local dev.
       host: '0.0.0.0',
       proxy: devProxy,
     },

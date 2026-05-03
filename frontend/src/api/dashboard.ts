@@ -12,17 +12,17 @@ export interface DashboardStats {
 }
 
 export interface RecentActivity {
-  id:          string
-  action:      string
-  entity_type: string
-  target?:     string | null
-  target_label?: string | null
-  performed_by?: string
+  id:               string
+  action:           string
+  entity_type?:     string
+  target?:          string | null
+  target_label?:    string | null
+  performed_by?:    string
   activity_summary?: string
-  created_at:  string
-  user?:       string
-  user_name?:  string
-  user_email?: string
+  created_at:       string
+  user?:            string
+  user_name?:       string
+  user_email?:      string
 }
 
 export interface PendingApproval {

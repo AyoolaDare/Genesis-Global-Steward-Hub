@@ -50,7 +50,7 @@ class Person(models.Model):
                                 on_delete=models.SET_NULL,
                                 related_name='merged_into'
                               )
-    deleted_at              = models.DateTimeField(null=True, blank=True)
+    deleted_at              = models.DateTimeField(null=True, blank=True, db_index=True)
     created_at              = models.DateTimeField(auto_now_add=True)
     updated_at              = models.DateTimeField(auto_now=True)
 

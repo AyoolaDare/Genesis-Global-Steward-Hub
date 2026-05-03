@@ -436,7 +436,7 @@ function MemberOnboardingSection({ onClose }: { onClose: () => void }) {
 
   const labelStyle = {
     display: 'block',
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: "'Public Sans', sans-serif",
     fontSize: 11,
     fontWeight: 500 as const,
     color: 'var(--gg-text-secondary)',
@@ -617,7 +617,7 @@ function MemberOnboardingSection({ onClose }: { onClose: () => void }) {
                   borderRadius: 'var(--radius-md)',
                   background: 'none',
                   cursor: 'pointer',
-                  fontFamily: "'DM Sans', sans-serif",
+                  fontFamily: "'Public Sans', sans-serif",
                   fontSize: 'var(--text-sm)',
                   color: 'var(--gg-text-secondary)',
                 }}

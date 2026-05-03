@@ -30,6 +30,7 @@ import {
   EXEC_ROLES, SESSION_TYPES, ATT_STATUS, STAGE_INFO,
 } from '../api/departments'
 import { personsApi, type PersonListItem } from '../api/persons'
+import toast from 'react-hot-toast'
 
 // ── Small helpers ─────────────────────────────────────────────────────────────
 
@@ -651,10 +652,10 @@ function MembersTab({ dept, execRole }: { dept: Department; execRole: ExecRole |
       qc.invalidateQueries({ queryKey: ['dept-detail', dept.id] })
       setAddSearch('')
       setAddOpen(false)
-      window.alert('Member added successfully.')
+      toast.success('Member added successfully.')
     },
-    onError: (error: any) => {
-      window.alert(extractApiErrorMessage(error, 'Could not add member.'))
+    onError: (error: unknown) => {
+      toast.error(extractApiErrorMessage(error, 'Could not add member.'))
     },
   })
 
@@ -1314,10 +1315,10 @@ function ExecutivesTab({ dept }: { dept: Department }) {
       qc.invalidateQueries({ queryKey: ['dept-detail', dept.id] })
       setGrantRole('HOD')
       setGrantOpen(false); setGrantSearch('')
-      window.alert('Executive role assigned successfully.')
+      toast.success('Executive role assigned successfully.')
     },
-    onError: (err: any) => {
-      window.alert(extractApiErrorMessage(err, 'Could not assign executive role.'))
+    onError: (err: unknown) => {
+      toast.error(extractApiErrorMessage(err, 'Could not assign executive role.'))
     },
   })
 

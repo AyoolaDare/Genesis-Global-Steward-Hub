@@ -1,0 +1,22 @@
+# Ignore unnecessary files when building Docker image
+.git
+.gitignore
+.dockerignore
+.env
+.env.local
+.env.*.local
+dist
+build
+node_modules
+.coverage
+.DS_Store
+.idea
+.vscode
+*.swp
+*.swo
+*~
+*.md
+docs/
+tests/
+.eslintcache
+.env.example

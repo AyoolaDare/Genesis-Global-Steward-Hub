@@ -1,4 +1,4 @@
-name: Deploy Frontend → Vercel
+name: Deploy Frontend → Azure Static Web Apps
 
 on:
   push:
@@ -7,50 +7,25 @@ on:
       - 'frontend/**'
       - '.github/workflows/deploy-frontend.yml'
 
+  # Allow manual trigger for emergency re-deploys
+  workflow_dispatch:
+
 jobs:
   deploy:
-    name: Deploy to Vercel
+    name: Deploy to Azure Static Web Apps
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
         with:
-          node-version: '20'
-
-      - name: Install dependencies
-        working-directory: frontend
-        run: npm install
-
-      - name: Build (sanity check before deploying)
-        working-directory: frontend
-        run: npm run build
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          app_location: frontend
+          output_location: dist
+          app_build_command: npm run build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
-
-      - name: Validate Vercel secrets
-        shell: bash
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: |
-          missing=0
-          [ -z "$VERCEL_TOKEN" ] && echo "Missing secret: VERCEL_TOKEN" && missing=1
-          [ -z "$VERCEL_ORG_ID" ] && echo "Missing secret: VERCEL_ORG_ID" && missing=1
-          [ -z "$VERCEL_PROJECT_ID" ] && echo "Missing secret: VERCEL_PROJECT_ID" && missing=1
-          if [ "$missing" -eq 1 ]; then
-            echo "Add missing secrets in GitHub: Settings > Secrets and variables > Actions"
-            exit 1
-          fi
-
-      - name: Deploy to Vercel (CLI)
-        shell: bash
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: |
-          npx vercel@latest --prod --yes --token "$VERCEL_TOKEN"

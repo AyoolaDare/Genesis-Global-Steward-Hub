@@ -19,11 +19,11 @@ RUN pip install --no-cache-dir -r requirements/production.txt
 # Copy source
 COPY . .
 
-# Collect static files at build time (WhiteNoise serves them at runtime)
-RUN python manage.py collectstatic --noinput \
-    --settings=cms.settings.production || true
+# Make entrypoint script executable
+RUN chmod +x entrypoint.sh
 
 EXPOSE 8000
 
-# Render passes $PORT; gunicorn binds to it.
-CMD ["sh", "-c", "python manage.py migrate --settings=cms.settings.production && gunicorn cms.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120 --access-logfile -"]
+# Use entrypoint script for graceful initialization
+ENTRYPOINT ["./entrypoint.sh"]
+CMD ["prod"]

@@ -109,7 +109,11 @@ class PersonViewSet(SoftDeleteMixin, viewsets.ModelViewSet):
             return Response({'error': 'Person not found.'}, status=status.HTTP_404_NOT_FOUND)
         return Response(PersonDetailSerializer(result).data)
 
-    @action(detail=False, methods=['post'], throttle_classes=[PhoneLookupThrottle])
+    @action(
+        detail=False, methods=['post'],
+        throttle_classes=[PhoneLookupThrottle],
+        permission_classes=[IsMedicalTeam | IsFollowUpTeam | IsAdmin | IsCellAdmin],
+    )
     def phone_lookup(self, request):
         serializer = PhoneLookupSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

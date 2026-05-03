@@ -16,6 +16,7 @@ import NotificationsPage from '@/pages/NotificationsPage'
 import MessagingPage     from '@/pages/MessagingPage'
 import AdminUsersPage    from '@/pages/AdminUsersPage'
 import ResetPasswordPage from '@/pages/ResetPasswordPage'
+import SponsorsPage      from '@/pages/SponsorsPage'
 import RoleGuard         from '@/components/RoleGuard'
 
 /** Returns the correct landing page for a given role. */
@@ -26,7 +27,7 @@ function homeFor(role: string | undefined) {
   return '/dashboard'
 }
 
-function ProtectedRoute({ children, hydrated }: { children: any; hydrated: boolean }) {
+function ProtectedRoute({ children, hydrated }: { children: React.ReactNode; hydrated: boolean }) {
   const location = useLocation()
   const token = useAuthStore((s) => s.accessToken)
   const mustResetPassword = useAuthStore((s) => s.user?.must_reset_password)
@@ -34,8 +35,8 @@ function ProtectedRoute({ children, hydrated }: { children: any; hydrated: boole
   // Still attempting silent refresh — don't redirect yet
   if (!hydrated) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--gg-bg)' }}>
-        <div style={{ width: 36, height: 36, border: '3px solid var(--gg-gold-200)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#FFFFFF' }}>
+        <div style={{ width: 36, height: 36, border: '3px solid #E5E7EB', borderTopColor: 'var(--gg-gold-200)', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     )
@@ -48,7 +49,7 @@ function ProtectedRoute({ children, hydrated }: { children: any; hydrated: boole
   return <>{children}</>
 }
 
-function LoginRoute({ children }: { children: any }) {
+function LoginRoute({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.accessToken)
   const role  = useAuthStore((s) => s.user?.role)
   if (token) return <Navigate to={homeFor(role)} replace />
@@ -147,6 +148,10 @@ export default function App() {
         <Route
           path="/messaging/*"
           element={<RoleGuard roles={['ADMIN', 'FOLLOWUP', 'HOD', 'ASST_HOD', 'WELFARE', 'PRO']}><MessagingPage /></RoleGuard>}
+        />
+        <Route
+          path="/sponsors/*"
+          element={<RoleGuard roles={['ADMIN']}><SponsorsPage /></RoleGuard>}
         />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="*"              element={<RoleHomeRedirect />} />

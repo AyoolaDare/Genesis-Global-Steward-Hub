@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 export type UserRole =
   | 'ADMIN' | 'MEDICAL' | 'FOLLOWUP' | 'CELL_LEADER' | 'CELL_ASST'
@@ -41,7 +41,7 @@ export const useAuthStore = create<AuthState>()(
 
       clearAuth: () => {
         set({ user: null, accessToken: null, refreshToken: null })
-        localStorage.removeItem('cms-auth')
+        sessionStorage.removeItem('cms-auth')
       },
 
       setToken: (token) => set({ accessToken: token }),
@@ -49,10 +49,11 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'cms-auth',
+      storage: createJSONStorage(() => sessionStorage),
       // Persist user + refreshToken so sessions survive page reloads.
+      // sessionStorage scopes tokens to the browser tab — they are cleared
+      // on tab close and are not accessible to other origins or tabs.
       // The access token stays short-lived (15 min) in memory only.
-      // On startup, App.tsx exchanges the persisted refresh token for
-      // a new access token before any protected route is rendered.
       partialize: (state) => ({
         user:         state.user,
         refreshToken: state.refreshToken,

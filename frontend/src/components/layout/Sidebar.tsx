@@ -2,7 +2,7 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, Users, Stethoscope, ClipboardList,
   UsersRound, Building2, Briefcase, Bell, MessageSquare,
-  LogOut, Shield, CalendarDays,
+  LogOut, Shield, CalendarDays, HandCoins,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { authApi } from '@/api/auth'
@@ -13,39 +13,39 @@ interface NavItem {
   label: string
   icon: any
   roles?: string[]
-  accent: string
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { to: '/dashboard',     label: 'Dashboard',    icon: <LayoutDashboard size={16} />, accent: 'var(--gg-gold-200)' },
-  { to: '/admin/users',   label: 'Access Control', icon: <Shield size={16} />,        roles: ['ADMIN'],             accent: 'var(--gg-gold-200)' },
-  { to: '/people',        label: 'Members',      icon: <Users size={16} />,           accent: 'var(--gg-gold-200)' },
-  { to: '/medical',       label: 'Medical',      icon: <Stethoscope size={16} />,     roles: ['ADMIN', 'MEDICAL'],  accent: 'var(--gg-success)' },
-  { to: '/followup',      label: 'Follow-Up',    icon: <ClipboardList size={16} />,   roles: ['ADMIN', 'FOLLOWUP'], accent: 'var(--gg-blue-200)' },
-  { to: '/cells',         label: 'Cell Groups',  icon: <UsersRound size={16} />,      roles: ['ADMIN'],             accent: 'var(--gg-ember-200)' },
-  { to: '/departments',   label: 'Departments',  icon: <Building2 size={16} />,       roles: ['ADMIN'],             accent: 'var(--gg-blue-100)' },
-  { to: '/hr',            label: 'HR',           icon: <Briefcase size={16} />,       roles: ['ADMIN', 'HR'],       accent: 'var(--gg-ember-100)' },
-  { to: '/messaging',     label: 'Messaging',    icon: <MessageSquare size={16} />,   roles: ['ADMIN', 'FOLLOWUP'], accent: 'var(--gg-blue-200)' },
-  { to: '/notifications', label: 'Notifications',icon: <Bell size={16} />,            accent: 'var(--gg-gold-200)' },
+  { to: '/dashboard',     label: 'Dashboard',      icon: <LayoutDashboard size={16} /> },
+  { to: '/admin/users',   label: 'Access Control', icon: <Shield size={16} />,         roles: ['ADMIN'] },
+  { to: '/people',        label: 'Members',        icon: <Users size={16} /> },
+  { to: '/medical',       label: 'Medical',        icon: <Stethoscope size={16} />,    roles: ['ADMIN', 'MEDICAL'] },
+  { to: '/followup',      label: 'Follow-Up',      icon: <ClipboardList size={16} />,  roles: ['ADMIN', 'FOLLOWUP'] },
+  { to: '/cells',         label: 'Cell Groups',    icon: <UsersRound size={16} />,     roles: ['ADMIN'] },
+  { to: '/departments',   label: 'Departments',    icon: <Building2 size={16} />,      roles: ['ADMIN'] },
+  { to: '/hr',            label: 'HR',             icon: <Briefcase size={16} />,      roles: ['ADMIN', 'HR'] },
+  { to: '/sponsors',      label: 'Sponsors',       icon: <HandCoins size={16} />,      roles: ['ADMIN'] },
+  { to: '/messaging',     label: 'Messaging',      icon: <MessageSquare size={16} />,  roles: ['ADMIN', 'FOLLOWUP'] },
+  { to: '/notifications', label: 'Notifications',  icon: <Bell size={16} /> },
 ]
 
 const DEPT_EXEC_ROLES = ['HOD', 'ASST_HOD', 'WELFARE', 'PRO']
 const CELL_EXEC_ROLES = ['CELL_LEADER', 'CELL_ASST']
 
-interface DeptNavItem { pathname: string; tab?: string; label: string; icon: any; accent: string }
+interface DeptNavItem { pathname: string; tab?: string; label: string; icon: any }
 
 const DEPT_EXEC_NAV: DeptNavItem[] = [
-  { pathname: '/departments',                    label: 'Dashboard',    icon: <LayoutDashboard size={16} />, accent: 'var(--gg-blue-100)' },
-  { pathname: '/departments', tab: 'members',    label: 'Members',      icon: <Users size={16} />,           accent: 'var(--gg-blue-100)' },
-  { pathname: '/departments', tab: 'attendance', label: 'Attendance',   icon: <CalendarDays size={16} />,    accent: 'var(--gg-blue-100)' },
-  { pathname: '/departments', tab: 'messages',   label: 'Messages',     icon: <MessageSquare size={16} />,   accent: 'var(--gg-blue-100)' },
-  { pathname: '/notifications',                  label: 'Notifications',icon: <Bell size={16} />,            accent: 'var(--gg-gold-200)' },
+  { pathname: '/departments',                    label: 'Dashboard',    icon: <LayoutDashboard size={16} /> },
+  { pathname: '/departments', tab: 'members',    label: 'Members',      icon: <Users size={16} /> },
+  { pathname: '/departments', tab: 'attendance', label: 'Attendance',   icon: <CalendarDays size={16} /> },
+  { pathname: '/departments', tab: 'messages',   label: 'Messages',     icon: <MessageSquare size={16} /> },
+  { pathname: '/notifications',                  label: 'Notifications',icon: <Bell size={16} /> },
 ]
 
 const CELL_EXEC_NAV: DeptNavItem[] = [
-  { pathname: '/cells',                    label: 'Dashboard',    icon: <LayoutDashboard size={16} />, accent: 'var(--gg-ember-200)' },
-  { pathname: '/cells', tab: 'members',   label: 'Members',      icon: <Users size={16} />,           accent: 'var(--gg-ember-200)' },
-  { pathname: '/notifications',            label: 'Notifications',icon: <Bell size={16} />,            accent: 'var(--gg-gold-200)' },
+  { pathname: '/cells',                  label: 'Dashboard',    icon: <LayoutDashboard size={16} /> },
+  { pathname: '/cells', tab: 'members', label: 'Members',      icon: <Users size={16} /> },
+  { pathname: '/notifications',          label: 'Notifications',icon: <Bell size={16} /> },
 ]
 
 const ROLE_LABELS: Record<string, string> = {
@@ -54,6 +54,13 @@ const ROLE_LABELS: Record<string, string> = {
   HR: 'Human Resources', HOD: 'Head of Dept', ASST_HOD: 'Asst. HOD',
   WELFARE: 'Welfare', PRO: 'PRO',
 }
+
+/* ── Shared style constants — DESIGN.md inverse-surface palette ── */
+const NAV_BG      = '#2d3133'   /* DESIGN.md inverse-surface */
+const ACTIVE_CLR  = '#f4d809'   /* DESIGN.md primary-container (gold CTA) */
+const MUTED_CLR   = 'rgba(239, 241, 243, 0.50)'  /* DESIGN.md inverse-on-surface at 50% */
+const ACTIVE_BG   = 'rgba(244, 216, 9, 0.12)'
+const BORDER_CLR  = 'rgba(239, 241, 243, 0.10)'  /* subtle divider on dark surface */
 
 interface Props {
   unreadCount: number
@@ -94,15 +101,12 @@ export default function Sidebar({ unreadCount, isMobile = false, open = false, o
 
   if (isMobile && !open) return null
 
-  /* ── shared nav item active background ── */
-  const activeItemBg = 'linear-gradient(90deg, rgba(212,175,55,0.10) 0%, transparent 100%)'
-
   const sidebar = (
     <aside style={{
       width: 240,
       height: '100vh',
-      background: 'var(--gg-surface)',
-      borderRight: '1px solid var(--gg-border-subtle)',
+      background: NAV_BG,
+      borderRight: `1px solid ${BORDER_CLR}`,
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden',
@@ -118,7 +122,7 @@ export default function Sidebar({ unreadCount, isMobile = false, open = false, o
         display: 'flex',
         alignItems: 'center',
         padding: '0 20px',
-        borderBottom: '1px solid var(--gg-border-subtle)',
+        borderBottom: `1px solid ${BORDER_CLR}`,
         gap: 12,
         flexShrink: 0,
       }}>
@@ -126,17 +130,19 @@ export default function Sidebar({ unreadCount, isMobile = false, open = false, o
           src="/app-logo.png"
           alt="Steward Hub"
           style={{
-            width: 32, height: 32, borderRadius: 8,
-            objectFit: 'cover', flexShrink: 0,
-            border: '1px solid rgba(212,175,55,0.28)',
+            width: 34, height: 34,
+            borderRadius: 10,
+            objectFit: 'cover',
+            flexShrink: 0,
+            border: `1px solid ${BORDER_CLR}`,
           }}
         />
         <span style={{
-          fontFamily: "'Cinzel', serif",
-          fontWeight: 600,
+          fontFamily: "'Public Sans', sans-serif",
+          fontWeight: 700,
           fontSize: 13,
-          letterSpacing: '0.07em',
-          color: 'var(--gg-gold-200)',
+          letterSpacing: '0.01em',
+          color: ACTIVE_CLR,
           whiteSpace: 'nowrap',
         }}>
           Steward Hub
@@ -146,12 +152,12 @@ export default function Sidebar({ unreadCount, isMobile = false, open = false, o
       {/* ── Nav ── */}
       <nav style={{ flex: 1, padding: '16px 0', overflowY: 'auto' }}>
         <p style={{
-          fontFamily: "'DM Sans', sans-serif",
+          fontFamily: "'Public Sans', sans-serif",
           fontSize: 10,
-          fontWeight: 500,
-          letterSpacing: '0.12em',
+          fontWeight: 600,
+          letterSpacing: '0.08em',
           textTransform: 'uppercase',
-          color: 'var(--gg-text-disabled)',
+          color: 'rgba(239, 241, 243, 0.30)',
           padding: '0 20px',
           marginBottom: 8, marginTop: 0,
         }}>
@@ -171,25 +177,25 @@ export default function Sidebar({ unreadCount, isMobile = false, open = false, o
                     padding: '10px 20px',
                     margin: '1px 8px',
                     borderRadius: 'var(--radius-md)',
-                    borderLeft: isActive ? `2px solid ${item.accent}` : '2px solid transparent',
+                    borderLeft: `2px solid ${isActive ? ACTIVE_CLR : 'transparent'}`,
                     border: 'none',
                     borderLeftWidth: 2,
                     borderLeftStyle: 'solid',
-                    borderLeftColor: isActive ? item.accent : 'transparent',
+                    borderLeftColor: isActive ? ACTIVE_CLR : 'transparent',
                     cursor: 'pointer',
                     width: 'calc(100% - 16px)',
-                    color: isActive ? item.accent : 'var(--gg-text-secondary)',
-                    background: isActive ? activeItemBg : 'transparent',
-                    fontFamily: "'DM Sans', sans-serif",
+                    color: isActive ? ACTIVE_CLR : MUTED_CLR,
+                    background: isActive ? ACTIVE_BG : 'transparent',
+                    fontFamily: "'Public Sans', sans-serif",
                     fontSize: 'var(--text-sm)',
-                    fontWeight: isActive ? 500 : 400,
+                    fontWeight: isActive ? 600 : 400,
                     whiteSpace: 'nowrap',
                     textAlign: 'left',
                     transition: 'color 150ms, background 150ms',
                     animationDelay: `${i * 0.05}s`,
                   }}
                 >
-                  <span style={{ flexShrink: 0, opacity: isActive ? 1 : 0.55 }}>{item.icon}</span>
+                  <span style={{ flexShrink: 0, opacity: isActive ? 1 : 0.7 }}>{item.icon}</span>
                   <span>{item.label}</span>
                   {item.pathname === '/notifications' && unreadCount > 0 && (
                     <span style={BADGE_STYLE}>{unreadCount > 99 ? '99+' : unreadCount}</span>
@@ -207,13 +213,13 @@ export default function Sidebar({ unreadCount, isMobile = false, open = false, o
                   padding: '10px 20px',
                   margin: '1px 8px',
                   borderRadius: 'var(--radius-md)',
-                  borderLeft: `2px solid ${isActive ? item.accent : 'transparent'}`,
+                  borderLeft: `2px solid ${isActive ? ACTIVE_CLR : 'transparent'}`,
                   textDecoration: 'none',
-                  color: isActive ? item.accent : 'var(--gg-text-secondary)',
-                  background: isActive ? activeItemBg : 'transparent',
-                  fontFamily: "'DM Sans', sans-serif",
+                  color: isActive ? ACTIVE_CLR : MUTED_CLR,
+                  background: isActive ? ACTIVE_BG : 'transparent',
+                  fontFamily: "'Public Sans', sans-serif",
                   fontSize: 'var(--text-sm)',
-                  fontWeight: isActive ? 500 : 400,
+                  fontWeight: isActive ? 600 : 400,
                   whiteSpace: 'nowrap',
                   transition: 'color 150ms, background 150ms',
                   animationDelay: `${i * 0.05}s`,
@@ -221,7 +227,7 @@ export default function Sidebar({ unreadCount, isMobile = false, open = false, o
               >
                 {({ isActive }) => (
                   <>
-                    <span style={{ flexShrink: 0, opacity: isActive ? 1 : 0.55 }}>{item.icon}</span>
+                    <span style={{ flexShrink: 0, opacity: isActive ? 1 : 0.7 }}>{item.icon}</span>
                     <span>{item.label}</span>
                     {item.to === '/notifications' && unreadCount > 0 && (
                       <span style={BADGE_STYLE}>{unreadCount > 99 ? '99+' : unreadCount}</span>
@@ -235,7 +241,7 @@ export default function Sidebar({ unreadCount, isMobile = false, open = false, o
 
       {/* ── User zone ── */}
       <div style={{
-        borderTop: '1px solid var(--gg-border-subtle)',
+        borderTop: `1px solid ${BORDER_CLR}`,
         padding: '14px 16px',
         display: 'flex', alignItems: 'center', gap: 10,
         flexShrink: 0,
@@ -243,28 +249,28 @@ export default function Sidebar({ unreadCount, isMobile = false, open = false, o
         <div style={{
           width: 34, height: 34,
           borderRadius: 'var(--radius-full)',
-          background: 'linear-gradient(135deg, rgba(212,175,55,0.22) 0%, rgba(212,175,55,0.08) 100%)',
-          border: '1px solid rgba(212,175,55,0.30)',
-          color: 'var(--gg-gold-200)',
+          background: 'rgba(244, 216, 9, 0.12)',
+          border: `1px solid ${BORDER_CLR}`,
+          color: ACTIVE_CLR,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: "'Cinzel', serif",
-          fontWeight: 600, fontSize: 12, flexShrink: 0, letterSpacing: '0.05em',
+          fontFamily: "'Public Sans', sans-serif",
+          fontWeight: 700, fontSize: 12, flexShrink: 0, letterSpacing: '0.02em',
         }}>
           {initials}
         </div>
         <div style={{ flex: 1, overflow: 'hidden' }}>
           <div style={{
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Public Sans', sans-serif",
             fontSize: 'var(--text-sm)', fontWeight: 500,
-            color: 'var(--gg-text-primary)',
+            color: 'var(--gg-nav-text)',
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>
             {user?.username}
           </div>
           <div style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 10, color: 'var(--gg-text-secondary)',
-            letterSpacing: '0.08em', textTransform: 'uppercase',
+            fontFamily: "'Public Sans', sans-serif",
+            fontSize: 10, color: MUTED_CLR,
+            letterSpacing: '0.06em', textTransform: 'uppercase',
           }}>
             {ROLE_LABELS[user?.role ?? ''] ?? user?.role}
           </div>
@@ -273,18 +279,21 @@ export default function Sidebar({ unreadCount, isMobile = false, open = false, o
           onClick={handleLogout}
           title="Sign out"
           style={{
-            background: 'none', border: '1px solid transparent',
+            background: 'none',
+            border: '1px solid transparent',
             borderRadius: 'var(--radius-sm)',
-            cursor: 'pointer', color: 'var(--gg-text-secondary)',
-            display: 'flex', padding: 6,
+            cursor: 'pointer',
+            color: MUTED_CLR,
+            display: 'flex',
+            padding: 6,
             transition: 'color 150ms, border-color 150ms',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.color = 'var(--gg-danger)'
-            e.currentTarget.style.borderColor = 'rgba(192,57,43,0.30)'
+            e.currentTarget.style.borderColor = 'rgba(239,68,68,0.30)'
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.color = 'var(--gg-text-secondary)'
+            e.currentTarget.style.color = MUTED_CLR
             e.currentTarget.style.borderColor = 'transparent'
           }}
         >
@@ -302,7 +311,7 @@ export default function Sidebar({ unreadCount, isMobile = false, open = false, o
         onClick={onClose}
         style={{
           position: 'fixed', inset: 0,
-          background: 'rgba(0,0,0,0.65)',
+          background: 'rgba(0,0,0,0.70)',
           backdropFilter: 'blur(4px)',
           zIndex: 55,
           animation: 'gg-fade-in 200ms ease-out both',
@@ -317,8 +326,8 @@ const BADGE_STYLE = {
   marginLeft: 'auto',
   background: 'var(--gg-danger)',
   color: '#fff',
-  borderRadius: 'var(--radius-full)',
-  fontFamily: "'DM Sans', sans-serif",
+  borderRadius: 'var(--radius-sm)',
+  fontFamily: "'Public Sans', sans-serif",
   fontSize: 10, fontWeight: 700,
   padding: '1px 6px', minWidth: 18, textAlign: 'center' as const,
 }

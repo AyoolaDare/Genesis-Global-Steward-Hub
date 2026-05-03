@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useReactTable, getCoreRowModel, flexRender, type ColumnDef } from '@tanstack/react-table'
 import { Briefcase, Search, UserPlus, UserX, Save } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { isAxiosError } from 'axios'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -97,7 +98,7 @@ function OnboardWorkerModal({ onClose }: { onClose: () => void }) {
       toast.success('Worker onboarded')
       onClose()
     },
-    onError: (err: any) => toast.error(err.response?.data?.error?.message ?? 'Onboarding failed'),
+    onError: (err: unknown) => toast.error(isAxiosError(err) ? (err.response?.data?.error?.message ?? 'Onboarding failed') : 'Onboarding failed'),
   })
 
   const onboardNewMutation = useMutation({
@@ -124,7 +125,7 @@ function OnboardWorkerModal({ onClose }: { onClose: () => void }) {
       toast.success('New worker added and onboarded')
       onClose()
     },
-    onError: (err: any) => toast.error(err.response?.data?.error?.message ?? 'Failed to add worker'),
+    onError: (err: unknown) => toast.error(isAxiosError(err) ? (err.response?.data?.error?.message ?? 'Failed to add worker') : 'Failed to add worker'),
   })
 
   const canCreateNew = Boolean(newPerson.first_name && newPerson.last_name && newPerson.phone)

@@ -21,6 +21,7 @@ urlpatterns = [
     path('api/v1/notifications/', include('apps.notifications.urls')),
     path('api/v1/messaging/',     include('apps.messaging.urls')),
     path('api/v1/audit/',         include('apps.audit.urls')),
+    path('api/v1/sponsors/',      include('apps.sponsors.urls')),
 
     # Global search
     path('api/v1/search/',        include('apps.persons.search_urls')),

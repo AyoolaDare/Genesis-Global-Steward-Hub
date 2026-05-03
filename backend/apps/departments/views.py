@@ -397,13 +397,19 @@ class DepartmentViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'], url_path='leaderboard/regular')
     def leaderboard_regular(self, request, pk=None):
         dept   = self.get_object()
-        months = int(request.query_params.get('months', 3))
+        try:
+            months = min(max(int(request.query_params.get('months', 3)), 1), 24)
+        except (ValueError, TypeError):
+            months = 3
         return Response(LeaderboardService.top_attendance(dept.pk, months=months))
 
     @action(detail=True, methods=['get'], url_path='leaderboard/training')
     def leaderboard_training(self, request, pk=None):
         dept   = self.get_object()
-        months = int(request.query_params.get('months', 3))
+        try:
+            months = min(max(int(request.query_params.get('months', 3)), 1), 24)
+        except (ValueError, TypeError):
+            months = 3
         return Response(
             LeaderboardService.top_attendance(dept.pk, session_type='TRAINING', months=months)
         )

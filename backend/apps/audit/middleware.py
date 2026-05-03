@@ -55,9 +55,11 @@ class AuditMiddleware:
         return response
 
     def _get_ip(self, request):
+        # Trust only the rightmost IP to prevent X-Forwarded-For spoofing.
+        # When behind Azure's load balancer the real client IP is the last entry.
         x_forwarded = request.META.get('HTTP_X_FORWARDED_FOR')
         if x_forwarded:
-            return x_forwarded.split(',')[0].strip()
+            return x_forwarded.split(',')[-1].strip()
         return request.META.get('REMOTE_ADDR')
 
     def _extract_entity(self, path: str):
@@ -148,6 +150,40 @@ class AuditMiddleware:
     def _build_target_display(self, request, entity_type, entity_id):
         if not entity_type:
             return None
-        if entity_id:
-            return f'{entity_type}:{entity_id}'
-        return entity_type
+        if not entity_id:
+            return entity_type
+        try:
+            name = self._lookup_entity_name(entity_type, entity_id)
+            return name or entity_type
+        except Exception:
+            return entity_type
+
+    def _lookup_entity_name(self, entity_type, entity_id):
+        try:
+            if entity_type == 'PERSON':
+                from apps.persons.models import Person
+                p = Person.objects.filter(pk=entity_id).first()
+                return f'{p.first_name} {p.last_name}'.strip() if p else None
+            if entity_type == 'CELL_GROUP':
+                from apps.cellgroups.models import CellGroup
+                g = CellGroup.objects.filter(pk=entity_id).first()
+                return g.name if g else None
+            if entity_type == 'DEPARTMENT':
+                from apps.departments.models import Department
+                d = Department.objects.filter(pk=entity_id).first()
+                return d.name if d else None
+            if entity_type == 'WORKER':
+                from apps.hr.models import WorkerProfile
+                w = WorkerProfile.objects.filter(pk=entity_id).select_related('person').first()
+                return f'{w.person.first_name} {w.person.last_name}'.strip() if w and w.person else None
+            if entity_type == 'FOLLOWUP':
+                from apps.followup.models import FollowUpTask
+                t = FollowUpTask.objects.filter(pk=entity_id).select_related('person').first()
+                return f'{t.person.first_name} {t.person.last_name}'.strip() if t and t.person else None
+            if entity_type == 'MEDICAL':
+                from apps.medical.models import MedicalRecord
+                r = MedicalRecord.objects.filter(pk=entity_id).select_related('person').first()
+                return f'{r.person.first_name} {r.person.last_name}'.strip() if r and r.person else None
+        except Exception:
+            pass
+        return None

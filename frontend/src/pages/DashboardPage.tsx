@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import {
   Users, Clock, CheckCircle, Briefcase,
   UsersRound, Building2, ClipboardList, Stethoscope,
+  Bell, ShieldCheck, Activity,
 } from 'lucide-react'
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -121,6 +122,23 @@ const PIE_COLORS = [
   'var(--accent-cell)',
   'var(--accent-department)',
 ]
+
+/* ─── Activity helpers ───────────────────────────────── */
+const ENTITY_META: Record<string, { icon: React.ReactNode; color: string; bg: string }> = {
+  PERSON:       { icon: <Users size={14} />,        color: '#1B4FDB', bg: '#EFF6FF' },
+  CELL_GROUP:   { icon: <UsersRound size={14} />,   color: '#EA580C', bg: '#FFF7ED' },
+  DEPARTMENT:   { icon: <Building2 size={14} />,    color: '#4338CA', bg: '#EEF2FF' },
+  WORKER:       { icon: <Briefcase size={14} />,    color: '#0D9488', bg: '#F0FDFA' },
+  FOLLOWUP:     { icon: <ClipboardList size={14} />,color: '#7C3AED', bg: '#F5F3FF' },
+  MEDICAL:      { icon: <Stethoscope size={14} />,  color: '#059669', bg: '#ECFDF5' },
+  NOTIFICATION: { icon: <Bell size={14} />,         color: '#D97706', bg: '#FFFBEB' },
+  AUTH:         { icon: <ShieldCheck size={14} />,  color: '#6B7280', bg: '#F9FAFB' },
+}
+const DEFAULT_ENTITY_META = { icon: <Activity size={14} />, color: '#6B7280', bg: '#F9FAFB' }
+
+function entityMeta(entityType?: string) {
+  return ENTITY_META[(entityType ?? '').toUpperCase()] ?? DEFAULT_ENTITY_META
+}
 
 /* ─── Main Component ─────────────────────────────────── */
 export default function DashboardPage() {
@@ -538,54 +556,100 @@ export default function DashboardPage() {
           </div>
 
           {activityLoading ? (
-            <div style={{ padding: 'var(--space-4)' }}>
+            <div style={{ padding: 'var(--space-4) var(--space-6)' }}>
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} style={{ marginBottom: 'var(--space-3)' }}>
-                  <Skeleton height={14} />
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
+                  <Skeleton height={32} width={32} />
+                  <div style={{ flex: 1 }}>
+                    <Skeleton height={13} width="65%" />
+                    <div style={{ marginTop: 5 }}><Skeleton height={11} width="45%" /></div>
+                  </div>
+                  <Skeleton height={11} width={60} />
                 </div>
               ))}
             </div>
           ) : activity && activity.length > 0 ? (
             <div>
-              {activity.slice(0, 8).map((a) => (
-                <div
-                  key={a.id}
-                  style={{
-                    padding: 'var(--space-3) var(--space-6)',
-                    borderBottom: '1px solid var(--color-border)',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
-                    gap: 'var(--space-3)',
-                  }}
-                >
-                  <div>
-                    <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-body)' }}>
-                      {a.activity_summary ? (
-                        a.activity_summary
-                      ) : (
-                        <>
-                          <span style={{ fontWeight: 600 }}>{a.user_name ?? a.user_email ?? a.performed_by ?? 'Unknown user'}</span>{' '}
-                          {a.action}
-                        </>
-                      )}
-                    </div>
-                    <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', marginTop: 2 }}>
-                      {a.target_label ? `Target: ${a.target_label}` : (a.target ? `Target: ${a.target}` : (a.entity_type ? `Entity: ${a.entity_type}` : 'System action'))}
-                    </div>
-                  </div>
+              {activity.slice(0, 8).map((a) => {
+                const meta = entityMeta(a.entity_type)
+                const actor = a.user_name ?? a.user_email ?? a.performed_by ?? 'System'
+                const label = a.target_label && !a.target_label.includes(':') ? a.target_label : null
+                return (
                   <div
+                    key={a.id}
                     style={{
-                      fontSize: 'var(--text-xs)',
-                      color: 'var(--color-text-muted)',
-                      whiteSpace: 'nowrap',
-                      flexShrink: 0,
+                      padding: 'var(--space-3) var(--space-6)',
+                      borderBottom: '1px solid var(--color-border)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 'var(--space-3)',
                     }}
                   >
-                    {format(new Date(a.created_at), 'MMM d, h:mma')}
+                    {/* Entity icon */}
+                    <div
+                      style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: '50%',
+                        background: meta.bg,
+                        color: meta.color,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {meta.icon}
+                    </div>
+
+                    {/* Text */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontSize: 'var(--text-sm)',
+                          fontWeight: 500,
+                          color: 'var(--color-text-primary)',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        {a.action || 'System action'}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 'var(--text-xs)',
+                          color: 'var(--color-text-muted)',
+                          marginTop: 2,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 4,
+                        }}
+                      >
+                        {label && (
+                          <>
+                            <span style={{ fontWeight: 500, color: 'var(--color-text-body)' }}>{label}</span>
+                            <span>·</span>
+                          </>
+                        )}
+                        <span>by {actor}</span>
+                      </div>
+                    </div>
+
+                    {/* Time */}
+                    <div
+                      style={{
+                        fontSize: 'var(--text-xs)',
+                        color: 'var(--color-text-muted)',
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {format(new Date(a.created_at), 'MMM d, h:mm a')}
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           ) : (
             <div

@@ -7,8 +7,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        display: ['Sora', 'sans-serif'],
-        body:    ['DM Sans', 'sans-serif'],
+        display: ['Public Sans', 'sans-serif'],
+        body:    ['Public Sans', 'sans-serif'],
         mono:    ['JetBrains Mono', 'monospace'],
       },
       colors: {

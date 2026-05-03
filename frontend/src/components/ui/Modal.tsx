@@ -77,10 +77,10 @@ export default function Modal({ open, onClose, title, width = 580, footer, child
             flexShrink: 0,
           }}>
             <h2 style={{
-              fontFamily: "'Cinzel', serif",
+              fontFamily: "'Public Sans', sans-serif",
               fontSize: 'var(--text-lg)',
-              fontWeight: 600,
-              letterSpacing: '0.04em',
+              fontWeight: 700,
+              letterSpacing: '-0.005em',
               color: 'var(--gg-text-primary)',
               margin: 0,
             }}>

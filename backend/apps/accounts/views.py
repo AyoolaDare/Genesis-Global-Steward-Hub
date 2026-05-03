@@ -49,7 +49,7 @@ class LoginView(APIView):
             logger.warning(
                 "LOGIN_FAILED identifier=%r ip=%s",
                 identifier,
-                request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', 'unknown')),
+                request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[-1].strip() or request.META.get('REMOTE_ADDR', 'unknown'),
             )
             return Response(
                 {'success': False, 'error': {'message': 'Invalid credentials', 'statusCode': 401}},
@@ -59,7 +59,7 @@ class LoginView(APIView):
             logger.warning(
                 "LOGIN_INACTIVE identifier=%r ip=%s",
                 identifier,
-                request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', 'unknown')),
+                request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[-1].strip() or request.META.get('REMOTE_ADDR', 'unknown'),
             )
             return Response(
                 {'success': False, 'error': {'message': 'Account is inactive', 'statusCode': 403}},
@@ -70,7 +70,7 @@ class LoginView(APIView):
             "LOGIN_SUCCESS user_id=%s role=%s ip=%s",
             user.pk,
             user.role,
-            request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', 'unknown')),
+            request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[-1].strip() or request.META.get('REMOTE_ADDR', 'unknown'),
         )
         refresh = RefreshToken.for_user(user)
         return Response({
@@ -130,6 +130,17 @@ class ResetPasswordView(APIView):
         user.set_password(new_password)
         user.must_reset_password = False
         user.save(update_fields=['password', 'must_reset_password', 'updated_at'])
+
+        # Blacklist all outstanding refresh tokens so old sessions cannot be reused
+        try:
+            from rest_framework_simplejwt.token_blacklist.models import (
+                OutstandingToken, BlacklistedToken,
+            )
+            for token in OutstandingToken.objects.filter(user=user):
+                BlacklistedToken.objects.get_or_create(token=token)
+        except Exception:
+            pass
+
         return Response({'success': True, 'message': 'Password reset successful'})
 
 

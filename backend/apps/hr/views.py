@@ -111,6 +111,7 @@ class WorkerProfileViewSet(viewsets.ModelViewSet):
         return Response(WorkerProfileSerializer(profile).data, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['patch'])
+    @transaction.atomic
     def update_status(self, request, pk=None):
         from datetime import date as date_type
         profile = self.get_object()
@@ -149,6 +150,7 @@ class WorkerProfileViewSet(viewsets.ModelViewSet):
         return Response(WorkerProfileSerializer(profile).data)
 
     @action(detail=True, methods=['post'])
+    @transaction.atomic
     def terminate(self, request, pk=None):
         profile = self.get_object()
         serializer = TerminateWorkerSerializer(data=request.data)

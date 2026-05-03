@@ -1,3 +1,6 @@
+import hmac as _hmac
+
+from django.conf import settings as django_settings
 from rest_framework.permissions import BasePermission
 
 
@@ -42,6 +45,20 @@ class IsDeptLeader(BasePermission):
 class IsHRTeam(BasePermission):
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_authenticated and request.user.role in ('ADMIN', 'HR'))
+
+
+class CronKeyPermission(BasePermission):
+    """
+    Allows GitHub Actions scheduled workflows to trigger cron endpoints
+    without requiring a JWT session.  Set CRON_SECRET in the App Service
+    environment, then send:  X-Cron-Secret: <secret>
+    """
+    def has_permission(self, request, view):
+        secret = getattr(django_settings, 'CRON_SECRET', '')
+        if not secret:
+            return False
+        incoming = request.headers.get('X-Cron-Secret', '')
+        return _hmac.compare_digest(incoming, secret)
 
 
 class CanReadMedicalRecord(BasePermission):
