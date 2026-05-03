@@ -186,6 +186,7 @@ SPECTACULAR_SETTINGS = {
 
 # CORS — credentials only enabled explicitly in production.py
 CORS_ALLOW_CREDENTIALS = False
+CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
     default='http://localhost:5173,http://localhost:3000',
